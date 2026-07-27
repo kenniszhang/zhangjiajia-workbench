@@ -1208,7 +1208,31 @@ function saveContent(){
     window.DATA.contents.push(data);
   }
   save();closeModal('contentModal');
+  // 同步到月历发布计划
+  syncContentToPlan(data);
   renderContentTabs();renderContentList();renderOverview();
+}
+function syncContentToPlan(data){
+  if(data.status!=='published' && data.status!=='scheduled') return;
+  let dateStr;
+  if(data.status==='published'){
+    const now=new Date();
+    dateStr=`${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+  }else if(data.status==='scheduled' && data.time){
+    const d=new Date(data.time);
+    dateStr=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  }
+  if(!dateStr) return;
+  const parts=dateStr.split('-');
+  const planKey=`${parts[0]}-${parseInt(parts[1])}`;
+  const day=String(parseInt(parts[2]));
+  if(!window.DATA.plan[planKey]) window.DATA.plan[planKey]={};
+  if(!window.DATA.plan[planKey][day]) window.DATA.plan[planKey][day]=[];
+  const exists=window.DATA.plan[planKey][day].some(i=>i.acct===data.acct && i.title===data.title);
+  if(!exists){
+    window.DATA.plan[planKey][day].push({acct:data.acct,title:data.title});
+    save();
+  }
 }
 function deleteContent(){
   const id=document.getElementById('contentId').value;
