@@ -167,6 +167,31 @@ body{min-height:100vh;padding-bottom:80px}
   .plan-calendar .pcell .pc-add{font-size:14px}
 }
 
+/* ========== 在进行任务(筹备看板) ========== */
+.prep-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;margin-bottom:10px;position:relative;overflow:hidden}
+.prep-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.prep-card.xhs1::before{background:linear-gradient(90deg,#ff2442,#ff6b80)}
+.prep-card.xhs2::before{background:#a855f7}
+.prep-card.dy::before{background:linear-gradient(90deg,#25f4ee,#fe2c55)}
+.prep-card .prep-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.prep-card .prep-top .prep-left{display:flex;align-items:center;gap:8px}
+.prep-card .prep-top .prep-left .prep-emoji{font-size:20px}
+.prep-card .prep-top .prep-left .prep-title{font-size:13px;font-weight:600}
+.prep-card .prep-top .prep-left .prep-meta{font-size:11px;color:var(--text-muted)}
+.prep-card .prep-top .prep-pct{font-size:11px;padding:2px 8px;border-radius:8px;font-weight:600}
+.prep-card .prep-top .prep-pct.low{background:rgba(59,130,246,.15);color:#60a5fa}
+.prep-card .prep-top .prep-pct.mid{background:rgba(251,191,36,.15);color:#fbbf24}
+.prep-card .prep-top .prep-pct.high{background:rgba(34,197,94,.15);color:#4ade80}
+.prep-card .prep-info{display:flex;gap:14px;font-size:11px;color:var(--text-muted);margin-bottom:8px}
+.prep-card .prep-bar-wrap{background:var(--bg);border-radius:6px;height:6px;overflow:hidden;margin-bottom:6px}
+.prep-card .prep-bar{height:100%;border-radius:6px;transition:width .4s}
+.prep-card .prep-bar.low{background:linear-gradient(90deg,#3b82f6,#2563eb)}
+.prep-card .prep-bar.mid{background:linear-gradient(90deg,#fbbf24,#f59e0b)}
+.prep-card .prep-bar.high{background:linear-gradient(90deg,#22c55e,#16a34a)}
+.prep-card .prep-foot{font-size:11px;color:var(--text-muted);display:flex;justify-content:space-between}
+.prep-card .prep-foot .prep-edit{color:#a855f7;cursor:pointer}
+.prep-card .prep-foot .prep-to-pub{color:var(--success);cursor:pointer;font-weight:600}
+
 /* ========== 内容管理 ========== */
 .tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .tabs::-webkit-scrollbar{display:none}
@@ -362,6 +387,13 @@ body{min-height:100vh;padding-bottom:80px}
     </div>
     <div class="task-list" id="historyTaskList" style="display:none"></div>
 
+    <!-- 在进行任务 -->
+    <div class="section-title" style="margin-top:24px">
+      <span class="left">在进行任务</span>
+      <span class="right"><a class="btn small" onclick="openPrepModal()">＋ 新建筹备</a></span>
+    </div>
+    <div id="prepList"></div>
+
     <!-- 本月计划 -->
     <div class="section-title" style="margin-top:24px">
       <span class="left" style="gap:0">本月发布计划</span>
@@ -448,6 +480,52 @@ body{min-height:100vh;padding-bottom:80px}
     </div>
     <div class="btn-group" style="margin-top:6px">
       <a class="btn primary" style="flex:1;justify-content:center" onclick="saveTask()">保存任务</a>
+    </div>
+  </div>
+</div>
+
+<!-- 筹备内容弹窗 -->
+<div class="modal-mask" id="prepModal">
+  <div class="modal">
+    <h3 id="prepModalTitle">新建筹备内容 <span class="close" onclick="closeModal('prepModal')">×</span></h3>
+    <input type="hidden" id="prepEditId">
+    <div class="form-group">
+      <label>选择账号</label>
+      <select id="pAcct">
+        <option value="xhs1">📕 小红书·墩墩比熊妹(宠物)</option>
+        <option value="xhs2">📚 小红书·小旅嗨(plog)</option>
+        <option value="dy1">🎵 抖音·墩墩比熊妹(宠物)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>标题</label>
+      <input type="text" id="pTitle" placeholder="如:比熊夏日穿搭图鉴">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>开始日期</label>
+        <input type="date" id="pStart">
+      </div>
+      <div class="form-group">
+        <label>结束日期</label>
+        <input type="date" id="pEnd">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>进度 (%)</label>
+      <input type="number" id="pProgress" min="0" max="100" placeholder="0-100">
+    </div>
+    <div class="form-group">
+      <label>下一步</label>
+      <input type="text" id="pNext" placeholder="如:拍摄素材 / 踩点选店">
+    </div>
+    <div class="form-group">
+      <label>备注/脚本(可选)</label>
+      <textarea id="pNote" placeholder="记录想法、大纲..."></textarea>
+    </div>
+    <div class="btn-group" style="margin-top:6px">
+      <a class="btn primary" style="flex:1;justify-content:center" onclick="savePrep()">保存</a>
+      <a class="btn ghost" onclick="deletePrep()">删除</a>
     </div>
   </div>
 </div>
@@ -577,6 +655,8 @@ function defaultData(){
       scheduled:0          // 待排期数
     },
     reviews:[],
+    // 在进行任务(筹备看板) [{id,acct,title,category,content,startDate,endDate,progress,nextStep}]
+    preps:[],
     // 本月发布计划: 按月+日存储 {"2026-7":{"15":[{acct,title}],...}}
     plan:{},
     // 计划浏览月份偏移(0=当月)
@@ -969,6 +1049,104 @@ document.addEventListener('click',e=>{
   if(_planPressFired){e.preventDefault();e.stopPropagation();_planPressFired=false}
 },true);
 
+/* ============ 在进行任务(筹备看板) ============ */
+function renderPrep(){
+  const D=window.DATA;
+  if(!D.preps) D.preps=[];
+  const el=document.getElementById('prepList');
+  if(D.preps.length===0){
+    el.innerHTML='<div class="empty"><div class="ico">📋</div>暂无筹备中的内容</div>';
+    return;
+  }
+  el.innerHTML=D.preps.map(p=>{
+    const a=ACCOUNTS[p.acct];
+    const pct=p.progress||0;
+    const lvl=pct<35?'low':pct<70?'mid':'high';
+    const days=calcDays(p.startDate,p.endDate);
+    return `<div class="prep-card ${p.acct}" onclick="editPrep(${p.id})">
+      <div class="prep-top">
+        <div class="prep-left">
+          <span class="prep-emoji">${a.emoji}</span>
+          <div>
+            <div class="prep-title">${p.title||'(无标题)'}</div>
+            <div class="prep-meta">${a.name} · ${a.platformName} · ${a.track}</div>
+          </div>
+        </div>
+        <span class="prep-pct ${lvl}">${pct}%</span>
+      </div>
+      <div class="prep-info">
+        <span>📅 ${p.startDate||'?'} → ${p.endDate||'?'}</span>
+        <span>⏱ ${days}天</span>
+      </div>
+      <div class="prep-bar-wrap"><div class="prep-bar ${lvl}" style="width:${pct}%"></div></div>
+      <div class="prep-foot">
+        <span>下一步: ${p.nextStep||'待填写'}</span>
+        <span class="prep-to-pub" onclick="event.stopPropagation();prepToContent(${p.id})">转为发布 ▸</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+function calcDays(s,e){
+  if(!s||!e) return '?';
+  const diff=new Date(e)-new Date(s);
+  return Math.max(1,Math.ceil(diff/86400000)+1);
+}
+function openPrepModal(id){
+  const p=id?window.DATA.preps.find(p=>p.id===id):null;
+  document.getElementById('prepEditId').value=id||'';
+  document.getElementById('pAcct').value=p?p.acct:'xhs1';
+  document.getElementById('pTitle').value=p?p.title||'':'';
+  document.getElementById('pStart').value=p?p.startDate||'':'';
+  document.getElementById('pEnd').value=p?p.endDate||'':'';
+  document.getElementById('pProgress').value=p?p.progress||0:0;
+  document.getElementById('pNext').value=p?p.nextStep||'':'';
+  document.getElementById('pNote').value=p?p.note||'':'';
+  document.getElementById('prepModalTitle').innerHTML=(p?'编辑筹备':'新建筹备内容')+' <span class="close" onclick="closeModal(\'prepModal\')">×</span>';
+  document.getElementById('prepModal').classList.add('show');
+}
+function editPrep(id){openPrepModal(id)}
+function savePrep(){
+  const editId=document.getElementById('prepEditId').value;
+  const data={
+    acct:document.getElementById('pAcct').value,
+    title:document.getElementById('pTitle').value.trim(),
+    startDate:document.getElementById('pStart').value,
+    endDate:document.getElementById('pEnd').value,
+    progress:parseInt(document.getElementById('pProgress').value)||0,
+    nextStep:document.getElementById('pNext').value.trim(),
+    note:document.getElementById('pNote').value.trim()
+  };
+  if(!data.title){alert('请输入标题');return}
+  if(editId){
+    const p=window.DATA.preps.find(p=>p.id===parseInt(editId));
+    if(p) Object.assign(p,data);
+  }else{
+    data.id=Date.now();
+    window.DATA.preps.push(data);
+  }
+  save();closeModal('prepModal');renderPrep();
+}
+function deletePrep(){
+  const id=document.getElementById('prepEditId').value;
+  if(!id){closeModal('prepModal');return}
+  if(!confirm('删除这条筹备内容?')) return;
+  window.DATA.preps=window.DATA.preps.filter(p=>p.id!==parseInt(id));
+  save();closeModal('prepModal');renderPrep();
+}
+function prepToContent(id){
+  const p=window.DATA.preps.find(p=>p.id===id);
+  if(!p) return;
+  // 打开新建内容弹窗并预填
+  openContentModal();
+  document.getElementById('cAcct').value=p.acct;
+  document.getElementById('cTitle').value=p.title||'';
+  document.getElementById('cContent').value=p.note||'';
+  document.getElementById('cStatus').value='draft';
+  document.getElementById('cTime').value='';
+  toggleTimeField();
+  // 不删除筹备项,保留看板记录
+}
+
 /* ============ 内容管理 ============ */
 let currentFilter='all';
 function renderContentTabs(){
@@ -1267,6 +1445,7 @@ document.querySelectorAll('.modal-mask').forEach(m=>m.onclick=e=>{if(e.target===
 initDate();
 renderOverview();
 renderTasks();
+renderPrep();
 renderPlan();
 renderContentTabs();
 renderContentList();
