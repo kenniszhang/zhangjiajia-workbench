@@ -1404,15 +1404,15 @@ function saveContent(){
 function syncContentToPlan(data){
   if(data.status!=='published' && data.status!=='scheduled') return;
   if(!data.time) return;
-  const d=new Date(data.time);
-  if(isNaN(d.getTime())) return;
-  const dateStr=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  // 直接用字符串解析避免时区问题: "2026-07-26" 或 "2026-07-26T00:00"
+  const m=data.time.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(!m) return;
+  const dateStr=`${m[1]}-${parseInt(m[2])}-${parseInt(m[3])}`;
   const parts=dateStr.split('-');
   const planKey=`${parts[0]}-${parseInt(parts[1])}`;
   const day=String(parseInt(parts[2]));
   if(!window.DATA.plan[planKey]) window.DATA.plan[planKey]={};
   if(!window.DATA.plan[planKey][day]) window.DATA.plan[planKey][day]=[];
-  // 去重:同账号+同标题不重复添加
   const exists=window.DATA.plan[planKey][day].some(i=>i.acct===data.acct && i.title===data.title);
   if(!exists){
     window.DATA.plan[planKey][day].push({acct:data.acct,title:data.title});
