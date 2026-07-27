@@ -1180,12 +1180,23 @@ function openContentModal(id){
 function toggleTimeField(){
   const st=document.getElementById('cStatus').value;
   const g=document.getElementById('cTimeGroup');
-  // 已发布时隐藏时间选择(避免无法保存),其他状态显示
+  const label=g.querySelector('label');
   if(st==='published'){
-    g.style.display='none';
-    document.getElementById('cTime').value='';  // 清空,避免校验冲突
-  }else{
+    label.textContent='发布日期';
     g.style.display='';
+    // 只在完全为空时才填今天(编辑已有内容时保留原值)
+    if(!document.getElementById('cTime').value){
+      const now=new Date();
+      const ds=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T00:00`;
+      document.getElementById('cTime').value=ds;
+    }
+  }else if(st==='scheduled'){
+    label.textContent='计划发布时间';
+    g.style.display='';
+  }else{
+    label.textContent='计划发布时间';
+    g.style.display='none';
+    document.getElementById('cTime').value='';
   }
 }
 function closeModal(id){document.getElementById(id).classList.remove('show')}
@@ -1214,20 +1225,16 @@ function saveContent(){
 }
 function syncContentToPlan(data){
   if(data.status!=='published' && data.status!=='scheduled') return;
-  let dateStr;
-  if(data.status==='published'){
-    const now=new Date();
-    dateStr=`${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-  }else if(data.status==='scheduled' && data.time){
-    const d=new Date(data.time);
-    dateStr=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-  }
-  if(!dateStr) return;
+  if(!data.time) return;
+  const d=new Date(data.time);
+  if(isNaN(d.getTime())) return;
+  const dateStr=`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
   const parts=dateStr.split('-');
   const planKey=`${parts[0]}-${parseInt(parts[1])}`;
   const day=String(parseInt(parts[2]));
   if(!window.DATA.plan[planKey]) window.DATA.plan[planKey]={};
   if(!window.DATA.plan[planKey][day]) window.DATA.plan[planKey][day]=[];
+  // 去重:同账号+同标题不重复添加
   const exists=window.DATA.plan[planKey][day].some(i=>i.acct===data.acct && i.title===data.title);
   if(!exists){
     window.DATA.plan[planKey][day].push({acct:data.acct,title:data.title});
