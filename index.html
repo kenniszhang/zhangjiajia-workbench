@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="嘎">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='180'%20height='180'%20viewBox='0%200%20180%20180'%3E%3Crect%20width='180'%20height='180'%20rx='40'%20fill='%23ff2442'/%3E%3Ctext%20x='90'%20y='125'%20font-size='110'%20font-family='PingFang%20SC,Microsoft%20YaHei,sans-serif'%20font-weight='700'%20fill='white'%20text-anchor='middle'%3E%E5%98%8E%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='180'%20height='180'%20viewBox='0%200%20180%20180'%3E%3Crect%20width='180'%20height='180'%20rx='40'%20fill='%23ff2442'/%3E%3Ctext%20x='90'%20y='125'%20font-size='110'%20font-family='PingFang%20SC,Microsoft%20YaHei,sans-serif'%20font-weight='700'%20fill='white'%20text-anchor='middle'%3E%E5%98%8E%3C/text%3E%3C/svg%3E">
+<title>张嘉嘉工作台</title>
+<style>
+/* ========== 设计系统变量 ========== */
+:root{
+  --bg:#0f1419;
+  --bg-card:#1a2028;
+  --bg-card-2:#222b36;
+  --bg-hover:#2a3441;
+  --border:#2d3744;
+  --text:#e8eef5;
+  --text-muted:#8b9bb0;
+  --text-dim:#5a6b80;
+  --primary:#ff2442;
+  --primary-soft:rgba(255,36,66,.15);
+  --primary-2:#ff9500;
+  --success:#22c55e;
+  --warning:#fbbf24;
+  --info:#3b82f6;
+  --purple:#a855f7;
+  --radius:14px;
+  --radius-sm:8px;
+  --shadow:0 4px 20px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;padding-bottom:80px}
+
+/* ========== 顶部 ========== */
+.header{position:sticky;top:0;z-index:100;background:rgba(15,20,25,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 20px}
+.header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.header h1{font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
+.header h1 .logo{width:28px;height:28px;background:linear-gradient(135deg,var(--primary),var(--primary-2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.header-meta{font-size:12px;color:var(--text-muted);display:flex;gap:14px;align-items:center}
+.header-meta .date{font-weight:600;color:var(--text)}
+.live-dot{width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite;display:inline-block}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ========== 导航 ========== */
+.nav-tabs{display:flex;gap:4px;padding:0 20px;background:var(--bg-card);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:62px;z-index:99}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{padding:12px 16px;font-size:14px;color:var(--text-muted);white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;font-weight:500}
+.nav-tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.nav-tab:active{background:var(--bg-hover)}
+
+/* ========== 容器 ========== */
+.container{max-width:1200px;margin:0 auto;padding:18px 16px}
+.view{display:none}
+.view.active{display:block;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ========== 账号卡片 ========== */
+.section-title{font-size:16px;font-weight:700;margin:18px 0 12px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.section-title .left{display:flex;align-items:center;gap:8px}
+.section-title .left::before{content:'';width:4px;height:18px;background:var(--primary);border-radius:2px;display:inline-block}
+.section-title .right{font-size:13px;color:var(--text-muted);font-weight:400}
+
+.acct-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:8px}
+.acct-tabs{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin-bottom:8px;padding-bottom:2px}
+.acct-tabs::-webkit-scrollbar{display:none}
+.acct-tabs .acct-card{min-width:200px;flex-shrink:0;padding:12px}
+.acct-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:.2s}
+.acct-card:active{transform:scale(.98)}
+.acct-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.acct-card.xhs::before{background:#ff2442}
+.acct-card.xhs2::before{background:#a855f7}
+.acct-card.dy::before{background:#000;background:linear-gradient(90deg,#25f4ee,#fe2c55)}
+.acct-card .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.acct-card .avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.acct-card.xhs .avatar{background:#ff2442;color:#fff}
+.acct-card.xhs2 .avatar{background:#a855f7;color:#fff}
+.acct-card.dy .avatar{background:#000;color:#fff}
+.acct-card .name{font-weight:600;font-size:15px}
+.acct-card .tag{font-size:11px;color:var(--text-muted);margin-top:2px;display:inline-block;background:var(--bg-card-2);padding:2px 8px;border-radius:10px}
+.acct-card .stats{display:flex;gap:14px;font-size:12px;color:var(--text-muted)}
+.acct-card .stats b{color:var(--text);font-size:16px;display:block;margin-bottom:2px;font-weight:700}
+.platform-badge{position:absolute;top:10px;right:10px;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600}
+.platform-badge.xhs{background:var(--primary-soft);color:#ff6b80}
+.platform-badge.xhs2{background:rgba(168,85,247,.15);color:#c084fc}
+.platform-badge.dy{background:rgba(37,244,238,.15);color:#25f4ee}
+
+/* ========== 统计概览 ========== */
+.overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.stat-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px}
+.stat-box .label{font-size:12px;color:var(--text-muted);margin-bottom:6px}
+.stat-box .value{font-size:22px;font-weight:700}
+.stat-box .sub{font-size:11px;color:var(--text-dim);margin-top:2px}
+.stat-box.primary .value{color:var(--primary)}
+.stat-box.success .value{color:var(--success)}
+.stat-box.warning .value{color:var(--warning)}
+.stat-box.info .value{color:var(--info)}
+
+/* ========== 任务台 ========== */
+.today-hero{background:linear-gradient(135deg,rgba(255,36,66,.18),rgba(255,149,0,.1));border:1px solid rgba(255,36,66,.3);border-radius:var(--radius);padding:18px;margin-bottom:16px}
+.today-hero .greet{font-size:18px;font-weight:700;margin-bottom:4px}
+.today-hero .sub{font-size:13px;color:var(--text-muted)}
+.today-hero .progress-wrap{margin-top:14px;display:flex;align-items:center;gap:12px}
+.progress-bar{flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--primary-2));border-radius:4px;transition:width .5s}
+.progress-text{font-size:13px;font-weight:600;white-space:nowrap}
+
+.task-list{display:flex;flex-direction:column;gap:8px}
+.task-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;align-items:flex-start;gap:12px;transition:.2s}
+.task-item.done{opacity:.5}
+.task-item.done .task-title{text-decoration:line-through;color:var(--text-muted)}
+.task-check{width:22px;height:22px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;margin-top:1px}
+.task-check.checked{background:var(--success);border-color:var(--success)}
+.task-check.checked::after{content:'✓';color:#fff;font-size:13px;font-weight:700}
+.task-body{flex:1;min-width:0;cursor:pointer}
+.task-title{font-size:14px;font-weight:500;margin-bottom:2px}
+.task-meta{font-size:11px;color:var(--text-muted);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.task-meta .pill{padding:1px 7px;border-radius:8px;background:var(--bg-card-2);font-size:10px}
+.task-meta .pill.xhs{color:#ff6b80}
+.task-meta .pill.xhs2{color:#c084fc}
+.task-meta .pill.dy{color:#25f4ee}
+.task-meta .pill.urgent{background:rgba(251,191,36,.15);color:var(--warning)}
+.task-meta .time{color:var(--primary-2);font-weight:600}
+.task-del{color:var(--text-dim);cursor:pointer;font-size:18px;padding:0 4px;opacity:0;transition:.2s}
+.task-item:active .task-del{opacity:1}
+
+/* ========== 计划表 ========== */
+.plan-table{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;overflow-x:auto}
+.plan-row{display:grid;grid-template-columns:80px 1fr 1fr 1fr 1fr 1fr 1fr;min-width:680px;border-bottom:1px solid var(--border)}
+.plan-row.header{background:var(--bg-card-2);font-size:12px;color:var(--text-muted);font-weight:600}
+.plan-row > div{padding:10px 8px;border-right:1px solid var(--border);font-size:13px;min-height:46px;display:flex;flex-direction:column;justify-content:center}
+.plan-row > div:last-child{border-right:none}
+.plan-row .day{font-weight:600;text-align:center;background:var(--bg-card-2)}
+.plan-row .day.today{color:var(--primary)}
+.plan-row .cell{cursor:pointer;transition:.1s}
+.plan-row .cell:active{background:var(--bg-hover)}
+.plan-row .cell .item{background:var(--primary-soft);color:#ff6b80;padding:3px 6px;border-radius:4px;font-size:11px;margin-bottom:3px;line-height:1.3}
+.plan-row .cell .item.dy{background:rgba(37,244,238,.12);color:#25f4ee}
+.plan-row .cell .item.other{background:rgba(168,85,247,.12);color:#c98bff}
+.plan-row .cell .add{font-size:20px;color:var(--text-dim);text-align:center;opacity:.5;line-height:1.6}
+.plan-row .cell:hover .add,.plan-row .cell:active .add{opacity:.6}
+
+/* ========== 月历计划表 ========== */
+.plan-scroll{overflow-x:auto;scrollbar-width:thin;-webkit-overflow-scrolling:touch;padding-bottom:6px;margin-bottom:8px}
+.plan-calendar{display:grid;grid-template-columns:repeat(7,minmax(100px,1fr));gap:4px;min-width:740px}
+.plan-calendar .pcell{border:1px solid var(--border);border-radius:8px;padding:6px;min-height:84px;cursor:pointer;background:var(--bg-card);position:relative;transition:.2s;overflow:hidden}
+.plan-calendar .pcell:active{background:var(--bg-hover);transform:scale(.98)}
+.plan-calendar .pcell.other-month{opacity:.35}
+.plan-calendar .pcell.today{border-color:var(--primary);background:rgba(255,36,66,.08)}
+.plan-calendar .pcell.weekend{background:var(--bg-card-2)}
+.plan-calendar .pcell .pc-num{font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:3px}
+.plan-calendar .pcell.today .pc-num{color:var(--primary)}
+.plan-calendar .pcell .pc-item{font-size:11px;background:var(--primary-soft);color:#ff6b80;padding:2px 5px;border-radius:4px;margin-bottom:2px;line-height:1.35;word-break:break-all;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;max-height:4.05em}
+.plan-calendar .pcell .pc-item.dy{background:rgba(37,244,238,.12);color:#25f4ee}
+.plan-calendar .pcell .pc-item.xhs2{background:rgba(168,85,247,.14);color:#c084fc}
+.plan-calendar .pcell .pc-add{font-size:16px;color:var(--text-dim);text-align:center;opacity:.4;line-height:1.8}
+.plan-weekday{display:grid;grid-template-columns:repeat(7,minmax(100px,1fr));gap:4px;margin-bottom:4px;min-width:740px}
+.plan-weekday div{text-align:center;font-size:11px;color:var(--text-muted);font-weight:600;padding:4px 0}
+.plan-weekday div.wknd{color:var(--text-dim)}
+@media(max-width:768px){
+  .plan-calendar .pcell{min-height:80px;padding:4px}
+  .plan-calendar .pcell .pc-num{font-size:10px}
+  .plan-calendar .pcell .pc-item{font-size:10px;padding:1px 4px;max-height:3.9em}
+  .plan-calendar .pcell .pc-add{font-size:14px}
+}
+
+/* ========== 内容管理 ========== */
+.tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:8px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;font-size:13px;color:var(--text-muted);white-space:nowrap;cursor:pointer;transition:.2s;font-weight:500}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tab .cnt{font-size:11px;opacity:.7;margin-left:4px}
+
+.content-list{display:flex;flex-direction:column;gap:10px}
+.content-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;transition:.2s}
+.content-item:active{transform:scale(.99)}
+.content-item .ci-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+.content-item .ci-title{font-size:15px;font-weight:600;flex:1;line-height:1.4}
+.content-item .ci-status{font-size:11px;padding:3px 9px;border-radius:10px;font-weight:600;white-space:nowrap}
+.ci-status.draft{background:rgba(139,155,176,.15);color:var(--text-muted)}
+.ci-status.scheduled{background:rgba(59,130,246,.15);color:#60a5fa}
+.ci-status.published{background:rgba(34,197,94,.15);color:#4ade80}
+.ci-status.failed{background:rgba(239,68,68,.15);color:#f87171}
+.content-item .ci-meta{font-size:12px;color:var(--text-muted);display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.content-item .ci-meta .pill{padding:2px 8px;border-radius:8px;background:var(--bg-card-2);font-size:11px}
+.content-item .ci-meta .pill.xhs{color:#ff6b80}
+.content-item .ci-meta .pill.xhs2{color:#c084fc}
+.content-item .ci-meta .pill.dy{color:#25f4ee}
+.content-item .ci-body{font-size:13px;color:var(--text-muted);line-height:1.6;padding:10px;background:var(--bg);border-radius:8px;margin-top:6px;white-space:pre-wrap;display:none}
+.content-item.expanded .ci-body{display:block}
+.content-item .ci-toggle{font-size:12px;color:var(--primary);cursor:pointer;margin-top:6px;display:inline-block}
+.content-item .ci-del-hint{position:absolute;top:8px;right:10px;font-size:11px;color:var(--warning);opacity:0;transition:.2s;background:rgba(251,191,36,.12);padding:2px 8px;border-radius:8px;pointer-events:none}
+.content-item.press .ci-del-hint{opacity:1}
+.content-item.press{border-color:var(--warning);background:rgba(251,191,36,.05)}
+.content-item{position:relative}
+
+/* ========== 数据复盘 ========== */
+.review-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.review-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
+.review-card .rc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.review-card .rc-title{font-size:14px;font-weight:600;flex:1}
+.review-card .rc-platform{font-size:11px;padding:2px 8px;border-radius:8px}
+.review-card .rc-platform.xhs{background:var(--primary-soft);color:#ff6b80}
+.review-card .rc-platform.xhs2{background:rgba(168,85,247,.15);color:#c084fc}
+.review-card .rc-platform.dy{background:rgba(37,244,238,.12);color:#25f4ee}
+.review-card .rc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.review-card .rc-stat{text-align:center;background:var(--bg);border-radius:6px;padding:8px 4px}
+.review-card .rc-stat .v{font-size:16px;font-weight:700}
+.review-card .rc-stat .l{font-size:10px;color:var(--text-muted);margin-top:2px}
+.review-card .rc-advice{font-size:12px;color:var(--warning);background:rgba(251,191,36,.08);border-left:3px solid var(--warning);padding:8px 10px;border-radius:4px;line-height:1.5}
+
+/* ========== 爆款情报 ========== */
+.hot-tabs{display:flex;gap:6px;margin-bottom:14px}
+.hot-tab{flex:1;padding:10px;text-align:center;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:600;transition:.2s}
+.hot-tab.active{background:var(--bg-card-2);border-color:var(--primary)}
+.hot-tab.active.xhs{color:#ff6b80;border-color:#ff2442}
+.hot-tab.active.dy{color:#25f4ee;border-color:#25f4ee}
+
+.hot-list{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.hot-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;display:flex;gap:12px;align-items:flex-start}
+.hot-rank{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.hot-rank.r1{background:#fbbf24;color:#000}
+.hot-rank.r2{background:#94a3b8;color:#000}
+.hot-rank.r3{background:#b45309;color:#fff}
+.hot-rank.r4,.hot-rank.r5,.hot-rank.r6,.hot-rank.r7,.hot-rank.r8,.hot-rank.r9,.hot-rank.r10{background:var(--bg-card-2);color:var(--text-muted)}
+.hot-body{flex:1;min-width:0}
+.hot-title{font-size:14px;font-weight:500;line-height:1.4;margin-bottom:4px}
+.hot-meta{font-size:11px;color:var(--text-muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.hot-meta .author{color:var(--primary-2)}
+.hot-meta .num{color:var(--text)}
+.hot-meta .recur{background:rgba(34,197,94,.12);color:#4ade80;padding:1px 6px;border-radius:6px;font-weight:600}
+.hot-meta .recur.high{background:rgba(251,191,36,.15);color:var(--warning)}
+
+.hot-words{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.hot-word{padding:6px 14px;background:var(--bg-card);border:1px solid var(--border);border-radius:20px;font-size:13px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px}
+.hot-word:active{transform:scale(.95)}
+.hot-word .heat{font-size:11px;color:var(--text-muted)}
+.hot-word.lvl1{color:#ff6b80;border-color:rgba(255,36,66,.4);font-weight:600}
+.hot-word.lvl2{color:var(--primary-2)}
+.hot-word.lvl3{color:var(--text)}
+
+.recur-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.recur-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;position:relative}
+.recur-card .rc-score{position:absolute;top:10px;right:10px;font-size:11px;font-weight:700;color:var(--success);background:rgba(34,197,94,.12);padding:2px 8px;border-radius:8px}
+.recur-card .rc-cat{font-size:11px;color:var(--text-muted);margin-bottom:4px}
+.recur-card .rc-t{font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.4}
+.recur-card .rc-why{font-size:11px;color:var(--text-muted);line-height:1.5;padding-top:6px;border-top:1px solid var(--border)}
+.recur-card .rc-why b{color:var(--warning)}
+
+/* ========== 按钮 ========== */
+.btn{padding:9px 16px;background:var(--bg-card-2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn.ghost{background:transparent}
+.btn.small{padding:6px 12px;font-size:12px}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ========== 弹窗 ========== */
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:flex-end;justify-content:center;padding:0}
+.modal-mask.show{display:flex;animation:fadeUp .25s}
+@keyframes fadeUp{from{opacity:0}to{opacity:1}}
+.modal{background:var(--bg-card);border-radius:18px 18px 0 0;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;padding:20px 18px 30px;animation:slideUp .3s}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.modal h3{font-size:17px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+.modal h3 .close{font-size:22px;color:var(--text-muted);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:6px;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--primary)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chip-group{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:16px;font-size:12px;cursor:pointer}
+.chip.active{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* 可编辑统计格 */
+.stat-box.editable{cursor:pointer;position:relative;transition:.2s}
+.stat-box.editable:active{background:var(--bg-hover)}
+.stat-box.editable::after{content:'✎';position:absolute;top:8px;right:10px;font-size:12px;color:var(--text-dim);opacity:.6}
+
+/* ========== 底部导航(手机) ========== */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,20,25,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:none;z-index:100}
+.bottom-nav-inner{display:flex;max-width:600px;margin:0 auto}
+.bn-item{flex:1;padding:8px 4px;text-align:center;cursor:pointer;color:var(--text-muted);transition:.2s}
+.bn-item.active{color:var(--primary)}
+.bn-item .ic{font-size:20px;display:block;line-height:1.2}
+.bn-item .lb{font-size:10px;font-weight:500}
+
+/* ========== 空状态 ========== */
+.empty{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:14px}
+.empty .ico{font-size:36px;margin-bottom:8px;opacity:.5}
+
+/* ========== 移动端 ========== */
+@media(max-width:768px){
+  body{padding-bottom:70px;font-size:14px}
+  .header{padding:10px 14px}
+  .header h1{font-size:16px}
+  .header-meta{font-size:11px;gap:8px}
+  .nav-tabs{display:none}
+  .bottom-nav{display:block;padding-bottom:env(safe-area-inset-bottom)}
+  .container{padding:14px 12px}
+  .overview{grid-template-columns:repeat(2,1fr)}
+  .stat-box .value{font-size:18px}
+  .form-row{grid-template-columns:1fr}
+  .review-card .rc-stats{grid-template-columns:repeat(4,1fr)}
+  .section-title{font-size:15px}
+  .today-hero .greet{font-size:16px}
+}
+@media(min-width:769px){
+  .modal{border-radius:18px;max-width:560px;margin:5vh auto}
+  .modal-mask{align-items:center;padding:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- 顶部 -->
+<div class="header">
+  <div class="header-inner">
+    <h1><span class="logo">嘉</span>张嘉嘉工作台</h1>
+    <div class="header-meta">
+      <span class="date" id="todayDate"></span>
+      <span><span class="live-dot"></span> <span id="weekDay"></span></span>
+    </div>
+  </div>
+</div>
+
+<!-- 顶部导航(桌面) -->
+<div class="nav-tabs" id="navTabs">
+  <div class="nav-tab active" data-view="dashboard">📊 工作台</div>
+  <div class="nav-tab" data-view="content">📝 内容发布</div>
+  <div class="nav-tab" data-view="review">📈 数据复盘</div>
+  <div class="nav-tab" data-view="hot">🔥 爆款情报</div>
+</div>
+
+<div class="container">
+
+  <!-- ============ 视图1: 工作台 ============ -->
+  <div class="view active" id="view-dashboard">
+    <!-- 概览:今日任务 + 账号标签 -->
+    <div class="section-title"><span class="left">账号概览</span><span class="right">3个账号 · 2个平台</span></div>
+    <div class="overview" id="overviewStats"></div>
+    <div class="acct-tabs" id="acctGrid"></div>
+
+    <!-- 今日任务回顾 -->
+    <div class="section-title"><span class="left">今日任务回顾</span><span class="right"><a class="btn small" onclick="openTaskModal()">＋ 添加任务</a></span></div>
+    <div class="today-hero">
+      <div class="greet" id="greetText">早上好，开始今天的工作！</div>
+      <div class="sub" id="greetSub">今天是复盘上周数据、规划本周内容的好时机</div>
+      <div class="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="taskProgress" style="width:0%"></div></div>
+        <div class="progress-text" id="taskProgressText">0/0</div>
+      </div>
+    </div>
+    <div class="task-list" id="taskList"></div>
+    <!-- 历史任务 -->
+    <div style="text-align:center;margin-top:8px">
+      <a class="btn small ghost" id="historyToggle" onclick="toggleTaskHistory()">📋 查看过往任务</a>
+    </div>
+    <div class="task-list" id="historyTaskList" style="display:none"></div>
+
+    <!-- 本月计划 -->
+    <div class="section-title" style="margin-top:24px">
+      <span class="left" style="gap:0">本月发布计划</span>
+      <span class="right" style="display:flex;align-items:center;gap:8px">
+        <a class="btn small" onclick="changePlanMonth(-1)">◀</a>
+        <span id="planMonthLabel" style="font-size:13px;font-weight:600;min-width:70px;text-align:center">2026年7月</span>
+        <a class="btn small" onclick="changePlanMonth(1)">▶</a>
+      </span>
+    </div>
+    <div id="planCalendar"></div>
+  </div>
+
+  <!-- ============ 视图2: 内容发布 ============ -->
+  <div class="view" id="view-content">
+    <div class="section-title"><span class="left">内容发布管理</span><span class="right"><a class="btn small primary" onclick="openContentModal()">＋ 新建内容</a></span></div>
+    <div class="tabs" id="contentTabs"></div>
+    <div class="content-list" id="contentList"></div>
+  </div>
+
+  <!-- ============ 视图3: 数据复盘 ============ -->
+  <div class="view" id="view-review">
+    <div class="section-title"><span class="left">数据复盘 & 优化建议</span><span class="right">点击数据可编辑</span></div>
+    <div class="review-grid" id="reviewGrid"></div>
+  </div>
+
+  <!-- ============ 视图4: 爆款情报 ============ -->
+  <div class="view" id="view-hot">
+    <div class="section-title"><span class="left">每日爆款榜</span><span class="right" id="hotUpdateTime"></span></div>
+    <div class="hot-tabs" id="hotTabs">
+      <div class="hot-tab active xhs" data-platform="xhs">📕 小红书爆款</div>
+      <div class="hot-tab" data-platform="dy">🎵 抖音爆款</div>
+    </div>
+    <div class="hot-list" id="hotList"></div>
+
+    <div class="section-title"><span class="left">热词榜</span><span class="right">按热度排序</span></div>
+    <div class="hot-words" id="hotWords"></div>
+
+    <div class="section-title"><span class="left">二创潜力内容</span><span class="right">易改编 · 流量红利</span></div>
+    <div class="recur-list" id="recurList"></div>
+  </div>
+
+</div>
+
+<!-- 底部导航(手机) -->
+<div class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <div class="bn-item active" data-view="dashboard"><span class="ic">📊</span><span class="lb">工作台</span></div>
+    <div class="bn-item" data-view="content"><span class="ic">📝</span><span class="lb">发布</span></div>
+    <div class="bn-item" data-view="review"><span class="ic">📈</span><span class="lb">复盘</span></div>
+    <div class="bn-item" data-view="hot"><span class="ic">🔥</span><span class="lb">情报</span></div>
+  </div>
+</div>
+
+<!-- 任务弹窗 -->
+<div class="modal-mask" id="taskModal">
+  <div class="modal">
+    <h3 id="taskModalTitle">添加任务 <span class="close" onclick="closeModal('taskModal')">×</span></h3>
+    <input type="hidden" id="taskEditId">
+    <div class="form-group">
+      <label>任务内容</label>
+      <input type="text" id="taskInput" placeholder="如：发布墩墩比熊妹今日视频">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>关联账号</label>
+        <select id="taskAcct">
+          <option value="">通用</option>
+          <option value="xhs1">小红书·墩墩比熊妹</option>
+          <option value="xhs2">小红书·小旅嗨</option>
+          <option value="dy1">抖音·墩墩比熊妹</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>时间</label>
+        <input type="time" id="taskTime">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>优先级</label>
+      <div class="chip-group" id="taskPrio">
+        <div class="chip active" data-v="normal">普通</div>
+        <div class="chip" data-v="urgent">紧急</div>
+      </div>
+    </div>
+    <div class="btn-group" style="margin-top:6px">
+      <a class="btn primary" style="flex:1;justify-content:center" onclick="saveTask()">保存任务</a>
+    </div>
+  </div>
+</div>
+
+<!-- 统计编辑弹窗 -->
+<div class="modal-mask" id="statModal">
+  <div class="modal">
+    <h3 id="statModalTitle">修改数据 <span class="close" onclick="closeModal('statModal')">×</span></h3>
+    <input type="hidden" id="statField">
+    <div class="form-group">
+      <label id="statLabel">数值</label>
+      <input type="text" id="statInput" placeholder="输入数值,如 0 / 12800">
+    </div>
+    <div class="btn-group" style="margin-top:6px">
+      <a class="btn primary" style="flex:1;justify-content:center" onclick="saveStat()">保存</a>
+    </div>
+  </div>
+</div>
+
+<!-- 计划表添加弹窗 -->
+<div class="modal-mask" id="planModal">
+  <div class="modal">
+    <h3 id="planModalTitle">添加计划 <span class="close" onclick="closeModal('planModal')">×</span></h3>
+    <input type="hidden" id="planDay">
+    <input type="hidden" id="planSlot">
+    <div class="form-group">
+      <label>内容标题</label>
+      <input type="text" id="planTitle" placeholder="如:墩墩穿搭 / 咖啡plog">
+    </div>
+    <div class="form-group">
+      <label>选择账号</label>
+      <div class="chip-group" id="planAcctChips">
+        <div class="chip active" data-v="xhs1">📕 小红书·墩墩比熊妹</div>
+        <div class="chip" data-v="xhs2">📚 小红书·小旅嗨</div>
+        <div class="chip" data-v="dy1">🎵 抖音·墩墩比熊妹</div>
+      </div>
+    </div>
+    <div class="btn-group" style="margin-top:6px">
+      <a class="btn primary" style="flex:1;justify-content:center" onclick="savePlan()">添加</a>
+    </div>
+  </div>
+</div>
+
+<!-- 内容弹窗 -->
+<div class="modal-mask" id="contentModal">
+  <div class="modal">
+    <h3 id="contentModalTitle">新建内容 <span class="close" onclick="closeModal('contentModal')">×</span></h3>
+    <input type="hidden" id="contentId">
+    <div class="form-group">
+      <label>选择账号</label>
+      <select id="cAcct">
+        <option value="xhs1">小红书·墩墩比熊妹(宠物)</option>
+        <option value="xhs2">小红书·小旅嗨(plog)</option>
+        <option value="dy1">抖音·墩墩比熊妹(宠物)</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>标题</label>
+        <input type="text" id="cTitle" placeholder="吸睛标题">
+      </div>
+      <div class="form-group">
+        <label>类别</label>
+        <select id="cCategory">
+          <option>日常分享</option><option>干货教程</option><option>搞笑合集</option>
+          <option>好物推荐</option><option>情感故事</option><option>热点追踪</option>
+          <option>vlog</option><option>plog</option><option>测评</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>内容正文/脚本</label>
+      <textarea id="cContent" placeholder="输入文案或脚本..."></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>状态</label>
+        <select id="cStatus" onchange="toggleTimeField()">
+          <option value="draft">草稿</option>
+          <option value="scheduled">已排期</option>
+          <option value="published">已发布</option>
+          <option value="failed">未通过</option>
+        </select>
+      </div>
+      <div class="form-group" id="cTimeGroup">
+        <label>计划发布时间</label>
+        <input type="datetime-local" id="cTime">
+      </div>
+    </div>
+    <div class="btn-group" style="margin-top:6px">
+      <a class="btn primary" style="flex:1;justify-content:center" onclick="saveContent()">保存</a>
+      <a class="btn ghost" onclick="deleteContent()">删除</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ 数据层 ============ */
+const STORAGE_KEY='mtb_data_v4';
+const ACCOUNTS={
+  xhs1:{name:'墩墩比熊妹',platform:'xhs',platformName:'小红书',track:'宠物赛道',emoji:'📕'},
+  xhs2:{name:'小旅嗨',platform:'xhs',platformName:'小红书',track:'图文plog赛道',emoji:'📚'},
+  dy1:{name:'墩墩比熊妹',platform:'dy',platformName:'抖音',track:'宠物赛道',emoji:'🎵'}
+};
+
+// 默认数据
+function defaultData(){
+  const today=new Date();
+  const y=today.getFullYear(),m=today.getMonth(),d=today.getDate();
+  const todayStr=`${y}-${pad(m+1)}-${pad(d)}`;
+  return {
+    tasks:[
+      {id:1,text:'回复粉丝评论(墩墩比熊妹·小红书)',acct:'xhs1',time:'09:30',prio:'normal',done:false,date:todayStr},
+      {id:2,text:'拍摄墩墩今日穿搭视频素材',acct:'dy1',time:'10:00',prio:'urgent',done:false,date:todayStr},
+      {id:3,text:'发布小红书plog:周末出行vlog',acct:'xhs2',time:'12:00',prio:'normal',done:false,date:todayStr},
+      {id:4,text:'抖音视频剪辑+发布(墩墩搞笑合集)',acct:'dy1',time:'15:00',prio:'urgent',done:false,date:todayStr},
+      {id:5,text:'查看今日爆款榜,收集二创灵感',acct:'',time:'17:00',prio:'normal',done:false,date:todayStr},
+      {id:6,text:'复盘昨日数据,记录优化点',acct:'',time:'21:00',prio:'normal',done:true,date:todayStr}
+    ],
+    contents:[],
+    // 可编辑的手动统计(独立于内容列表,点击概览格子可修改)
+    stats:{
+      contentTotal:0,      // 内容总数
+      published:0,         // 已发布数
+      totalFans:0,         // 当前粉丝
+      hotContent:0,        // 超500播放量内容数
+      scheduled:0          // 待排期数
+    },
+    reviews:[],
+    // 本月发布计划: 按月+日存储 {"2026-7":{"15":[{acct,title}],...}}
+    plan:{},
+    // 计划浏览月份偏移(0=当月)
+    planMonthOffset:0,
+    hot:{
+      xhs:[
+        {rank:1,title:'养比熊前必须知道的5件事,第3条90%的人不知道',author:'比熊麻麻日记',likes:'8.2w',views:'42w',recur:'high',recurScore:92},
+        {rank:2,title:'2024夏日宠物穿搭图鉴|小体比熊专场',author:'萌宠衣橱',likes:'5.6w',views:'28w',recur:'high',recurScore:88},
+        {rank:3,title:'我家狗子第一次见雪的反应😂',author:'柴犬大福',likes:'12w',views:'68w',recur:'mid',recurScore:75},
+        {rank:4,title:'plog|一个人住的第100天,把生活过成诗',author:'独居日记',likes:'6.8w',views:'35w',recur:'high',recurScore:85},
+        {rank:5,title:'低预算改造出租屋,800块住出ins风',author:'租房改造家',likes:'9.3w',views:'52w',recur:'mid',recurScore:70},
+        {rank:6,title:'比熊泪痕自救指南|亲测2周见效',author:'墩墩妈',likes:'4.1w',views:'22w',recur:'high',recurScore:90},
+        {rank:7,title:'周末City Walk|藏在巷子里的宝藏咖啡店',author:'小旅嗨',likes:'3.5w',views:'18w',recur:'mid',recurScore:72},
+        {rank:8,title:'一人食|5分钟搞定的治愈系晚餐',author:'独居食堂',likes:'4.8w',views:'25w',recur:'high',recurScore:82},
+        {rank:9,title:'养狗后我才发现的10个真相',author:'宠物博主联盟',likes:'7.1w',views:'38w',recur:'low',recurScore:60},
+        {rank:10,title:'秋日plog|和闺蜜的下午茶时光',author:'生活记录者',likes:'3.2w',views:'16w',recur:'mid',recurScore:68}
+      ],
+      dy:[
+        {rank:1,title:'比熊听到"洗澡"两个字的反应,笑死!',author:'萌宠日记',likes:'28w',views:'320w',recur:'high',recurScore:95},
+        {rank:2,title:'养比熊的人都有这5个习惯,中3个以上是真爱',author:'比熊控',likes:'18w',views:'210w',recur:'high',recurScore:89},
+        {rank:3,title:'我家狗子拆家第101天,我终于悟了',author:'训犬师老王',likes:'22w',views:'260w',recur:'mid',recurScore:78},
+        {rank:4,title:'3招让比熊不再挑食!亲测有效',author:'宠物营养师',likes:'15w',views:'180w',recur:'high',recurScore:86},
+        {rank:5,title:'当比熊穿上汉服...这谁顶得住!',author:'古风萌宠',likes:'32w',views:'410w',recur:'high',recurScore:91},
+        {rank:6,title:'一个人住的周末vlog|治愈系日常',author:'独居生活家',likes:'9.8w',views:'120w',recur:'mid',recurScore:74},
+        {rank:7,title:'比熊幼犬到家第一周该怎么养',author:'新手养狗指南',likes:'12w',views:'150w',recur:'high',recurScore:84},
+        {rank:8,title:'City Walk打卡|小众出片地推荐',author:'城市探索者',likes:'8.5w',views:'95w',recur:'mid',recurScore:70},
+        {rank:9,title:'宠物搞笑合集|养狗人的快乐源泉',author:'搞笑萌宠',likes:'45w',views:'580w',recur:'low',recurScore:62},
+        {rank:10,title:'低预算养狗攻略|月花500搞定',author:'省钱养宠',likes:'11w',views:'140w',recur:'mid',recurScore:73}
+      ]
+    },
+    hotWords:[
+      {word:'比熊泪痕',heat:'9.8w',lvl:1},
+      {word:'宠物夏日穿搭',heat:'8.5w',lvl:1},
+      {word:'City Walk',heat:'7.2w',lvl:1},
+      {word:'一人食',heat:'6.8w',lvl:2},
+      {word:'独居plog',heat:'6.2w',lvl:2},
+      {word:'比熊训练',heat:'5.9w',lvl:2},
+      {word:'出租屋改造',heat:'5.3w',lvl:2},
+      {word:'周末vlog',heat:'4.8w',lvl:3},
+      {word:'治愈系日常',heat:'4.2w',lvl:3},
+      {word:'宠物搞笑',heat:'3.9w',lvl:3},
+      {word:'小众咖啡店',heat:'3.5w',lvl:3},
+      {word:'养狗真相',heat:'3.1w',lvl:3}
+    ],
+    recurContents:[
+      {cat:'宠物·小红书',title:'比熊泪痕护理干货(2024新版)',score:92,why:'<b>热点高+赛道契合</b>:泪痕是比熊主人最大痛点,搜索量大,你的账号正好是宠物赛道'},
+      {cat:'宠物·抖音',title:'比熊穿汉服/小裙子变装视频',score:91,why:'<b>爆款形式+视觉冲击</b>:变装类视频完播率高,比熊造型反差萌,易引发转发'},
+      {cat:'plog·小红书',title:'独居女生一日plog(治愈风)',score:85,why:'<b>赛道热点+情绪共鸣</b>:独居plog持续火爆,小旅嗨账号可直接套用模板'},
+      {cat:'宠物·抖音',title:'3招解决比熊挑食/拆家',score:86,why:'<b>干货类+痛点强</b>:训犬干货完播率高,易收藏,适合长尾流量'},
+      {cat:'plog·小红书',title:'周末City Walk探店plog',score:82,why:'<b>季节热点+本地流量</b>:City Walk热度回升,结合咖啡店探店易出圈'},
+      {cat:'宠物·小红书',title:'比熊夏日清凉穿搭图鉴',score:88,why:'<b>季节性+高颜值</b>:夏季宠物穿搭搜索量暴增,图文形式小红书友好'}
+    ]
+  };
+}
+
+function pad(n){return n<10?'0'+n:n}
+function load(){
+  try{
+    const s=localStorage.getItem(STORAGE_KEY);
+    if(s) return JSON.parse(s);
+  }catch(e){}
+  const d=defaultData();
+  save(d);
+  return d;
+}
+function save(d){
+  if(!d) d=window.DATA;
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
+}
+window.DATA=load();
+
+/* ============ 视图切换 ============ */
+function switchView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.toggle('active',t.dataset.view===name));
+  document.querySelectorAll('.bn-item').forEach(t=>t.classList.toggle('active',t.dataset.view===name));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav-tab,.bn-item').forEach(el=>{
+  el.onclick=()=>switchView(el.dataset.view);
+});
+
+/* ============ 日期 ============ */
+function initDate(){
+  const now=new Date();
+  const wd=['周日','周一','周二','周三','周四','周五','周六'][now.getDay()];
+  document.getElementById('todayDate').textContent=`${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())}`;
+  document.getElementById('weekDay').textContent=wd;
+  const h=now.getHours();
+  const greet=h<6?'夜深了,注意休息':h<11?'早上好,元气满满':h<14?'中午好,小憩一下':h<18?'下午好,继续冲刺':h<22?'晚上好,复盘时间':'夜深了,该休息了';
+  document.getElementById('greetText').textContent=greet+'!';
+  const tips=['今天是复盘上周数据、规划本周内容的好时机','记得查看爆款榜,捕捉今日热点','发布内容前先看看热词,优化标题','数据复盘是涨粉的关键,别偷懒','二创内容要趁热,错过热点就晚了'];
+  document.getElementById('greetSub').textContent=tips[Math.floor(Math.random()*tips.length)];
+}
+
+/* ============ 概览 ============ */
+function renderOverview(){
+  const D=window.DATA;
+  if(!D.stats) D.stats={contentTotal:0,published:0,totalFans:0,hotContent:0,scheduled:0};
+  const s=D.stats;
+  const taskDone=D.tasks.filter(t=>t.done).length;
+  const taskTotal=D.tasks.length;
+  const taskPct=taskTotal>0?Math.round(taskDone/taskTotal*100):0;
+
+  document.getElementById('overviewStats').innerHTML=`
+    <div class="stat-box primary"><div class="label">今日任务</div><div class="value">${taskDone}/${taskTotal}</div><div class="sub">完成${taskPct}%</div></div>
+  `;
+
+  document.getElementById('acctGrid').innerHTML=Object.entries(ACCOUNTS).map(([k,a])=>{
+    const list=D.contents.filter(c=>c.acct===k);
+    const pub=list.filter(c=>c.status==='published').length;
+    return `<div class="acct-card ${a.platform} ${k==='xhs2'?'xhs2':''}" onclick="filterContent('${k}')">
+      <span class="platform-badge ${a.platform} ${k==='xhs2'?'xhs2':''}">${a.platformName}</span>
+      <div class="top">
+        <div class="avatar">${a.emoji}</div>
+        <div>
+          <div class="name">${a.name}</div>
+          <span class="tag">${a.track}</span>
+        </div>
+      </div>
+      <div class="stats">
+        <div><b>${list.length}</b>内容</div>
+        <div><b>${pub}</b>已发</div>
+        <div><b>—</b>待发布</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function formatNum(n){
+  if(n>=10000) return (n/10000).toFixed(1)+'w';
+  return n.toLocaleString();
+}
+
+/* ============ 任务 ============ */
+function getTodayStr(){
+  const now=new Date();
+  return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+}
+function renderTasks(){
+  const D=window.DATA;
+  const todayStr=getTodayStr();
+  const todayTasks=D.tasks.filter(t=>t.date===todayStr);
+  const list=document.getElementById('taskList');
+  if(todayTasks.length===0){
+    list.innerHTML='<div class="empty"><div class="ico">📋</div>今日暂无任务,点击右上角添加</div>';
+  }else{
+    list.innerHTML=todayTasks.map(t=>buildTaskItem(t)).join('');
+  }
+  const done=todayTasks.filter(t=>t.done).length;
+  const total=todayTasks.length;
+  const pct=total>0?Math.round(done/total*100):0;
+  document.getElementById('taskProgress').style.width=pct+'%';
+  document.getElementById('taskProgressText').textContent=`${done}/${total}`;
+  // 也更新今日任务概览数字
+  document.querySelector('#overviewStats .stat-box.primary .value').textContent=`${done}/${total}`;
+  document.querySelector('#overviewStats .stat-box.primary .sub').textContent=`完成${pct}%`;
+
+  // 如果有历史任务,显示按钮
+  const histCount=D.tasks.filter(t=>t.date!==todayStr).length;
+  document.getElementById('historyToggle').style.display=histCount>0?'inline-block':'none';
+}
+function buildTaskItem(t){
+  const a=t.acct?ACCOUNTS[t.acct]:null;
+  return `<div class="task-item ${t.done?'done':''}">
+    <div class="task-check ${t.done?'checked':''}" onclick="toggleTask(${t.id})"></div>
+    <div class="task-body" onclick="editTask(${t.id})">
+      <div class="task-title">${t.text}</div>
+      <div class="task-meta">
+        ${t.time?`<span class="time">⏰ ${t.time}</span>`:''}
+        ${a?`<span class="pill ${a.platform} ${t.acct==='xhs2'?'xhs2':''}">${a.platformName}·${a.name}</span>`:'<span class="pill">通用</span>'}
+        ${t.prio==='urgent'?'<span class="pill urgent">紧急</span>':''}
+        ${t.date?`<span class="pill">📅 ${t.date.slice(5)}</span>`:''}
+      </div>
+    </div>
+    <span class="task-del" onclick="delTask(${t.id})">×</span>
+  </div>`;
+}
+function toggleTask(id){
+  const t=window.DATA.tasks.find(t=>t.id===id);
+  if(!t) return;
+  t.done=!t.done;
+  save();renderTasks();renderOverview();
+}
+function delTask(id){
+  if(!confirm('删除这个任务?')) return;
+  window.DATA.tasks=window.DATA.tasks.filter(t=>t.id!==id);
+  save();renderTasks();renderOverview();
+}
+let _showHistory=false;
+function toggleTaskHistory(){
+  _showHistory=!_showHistory;
+  const el=document.getElementById('historyTaskList');
+  const btn=document.getElementById('historyToggle');
+  const todayStr=getTodayStr();
+  if(_showHistory){
+    const hist=window.DATA.tasks.filter(t=>t.date!==todayStr).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    if(hist.length===0){
+      el.innerHTML='<div class="empty"><div class="ico">📦</div>暂无过往任务</div>';
+    }else{
+      // 按日期分组
+      const groups={};
+      hist.forEach(t=>{
+        if(!groups[t.date]) groups[t.date]=[];
+        groups[t.date].push(t);
+      });
+      let html='<div class="section-title" style="margin-top:8px"><span class="left">过往任务</span></div>';
+      Object.keys(groups).sort().reverse().forEach(date=>{
+        html+=`<div style="font-size:12px;color:var(--text-muted);margin:10px 0 4px;font-weight:600">📅 ${date}</div>`;
+        groups[date].forEach(t=>{html+=buildTaskItem(t);});
+      });
+      el.innerHTML=html;
+    }
+    el.style.display='block';
+    btn.textContent='📋 收起过往任务';
+  }else{
+    el.style.display='none';
+    btn.textContent='📋 查看过往任务';
+  }
+}
+function editTask(id){
+  const t=window.DATA.tasks.find(t=>t.id===id);
+  if(!t) return;
+  document.getElementById('taskEditId').value=id;
+  document.getElementById('taskInput').value=t.text;
+  document.getElementById('taskAcct').value=t.acct||'';
+  document.getElementById('taskTime').value=t.time||'';
+  document.querySelectorAll('#taskPrio .chip').forEach(c=>c.classList.toggle('active',c.dataset.v===t.prio));
+  document.getElementById('taskModalTitle').innerHTML='编辑任务 <span class="close" onclick="closeModal(\'taskModal\')">×</span>';
+  document.getElementById('taskModal').classList.add('show');
+  setTimeout(()=>document.getElementById('taskInput').focus(),100);
+}
+function saveTask(){
+  const editId=document.getElementById('taskEditId').value;
+  const text=document.getElementById('taskInput').value.trim();
+  if(!text){alert('请输入任务内容');return}
+  const acct=document.getElementById('taskAcct').value;
+  const time=document.getElementById('taskTime').value;
+  const prio=document.querySelector('#taskPrio .chip.active').dataset.v;
+  if(editId){
+    // 编辑已有任务
+    const t=window.DATA.tasks.find(t=>t.id===parseInt(editId));
+    if(t){t.text=text;t.acct=acct;t.time=time;t.prio=prio}
+  }else{
+    // 新增
+    const id=Date.now();
+    const todayStr=getTodayStr();
+    window.DATA.tasks.push({id,text,acct,time,prio,done:false,date:todayStr});
+  }
+  save();
+  document.getElementById('taskEditId').value='';
+  document.getElementById('taskInput').value='';
+  document.getElementById('taskTime').value='';
+  closeModal('taskModal');
+  renderTasks();renderOverview();
+}
+
+/* ============ 计划表 ============ */
+/* ============ 本月计划(月历) ============ */
+function getPlanKey(offset){
+  const now=new Date();
+  const d=new Date(now.getFullYear(),now.getMonth()+offset,1);
+  return `${d.getFullYear()}-${d.getMonth()+1}`;
+}
+function changePlanMonth(dir){
+  window.DATA.planMonthOffset=(window.DATA.planMonthOffset||0)+dir;
+  renderPlan();
+}
+function renderPlan(){
+  const D=window.DATA;
+  D.planMonthOffset=D.planMonthOffset||0;
+  const offset=D.planMonthOffset;
+  const now=new Date();
+  const target=new Date(now.getFullYear(),now.getMonth()+offset,1);
+  const year=target.getFullYear(),month=target.getMonth(); // month 0-indexed
+  const monthLabel=`${year}年${month+1}月`;
+  document.getElementById('planMonthLabel').textContent=monthLabel;
+
+  // 当月第一天星期几(0=周日)
+  const firstDay=new Date(year,month,1).getDay();
+  // 当月天数
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  // 上月天数
+  const prevDays=new Date(year,month,0).getDate();
+
+  const today=new Date();
+  const todayNum=today.getDate();
+  const isCurrentMonth=(today.getFullYear()===year && today.getMonth()===month);
+
+  const planKey=getPlanKey(offset);
+  const monthData=D.plan[planKey]||{};
+
+  // 星期表头 + 日历整体放进滚动容器
+  const wd=['日','一','二','三','四','五','六'];
+  let html=`<div class="plan-scroll">`;
+  html+=`<div class="plan-weekday">${wd.map((w,i)=>
+    `<div class="${i===0||i===6?'wknd':''}">${w}</div>`
+  ).join('')}</div>`;
+
+  html+='<div class="plan-calendar">';
+  // 填充上月末尾
+  for(let i=firstDay-1;i>=0;i--){
+    const d=prevDays-i;
+    html+=`<div class="pcell other-month" onclick="openPlanCell('${year}-${pad(month)}','${d}')">
+      <div class="pc-num">${d}</div>
+      <div class="pc-add">+</div>
+    </div>`;
+  }
+  // 当月每一天
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=isCurrentMonth && d===todayNum;
+    const weekend=(firstDay+d-1)%7===0 || (firstDay+d-1)%7===6;
+    const items=monthData[String(d)]||[];
+    html+=`<div class="pcell${isToday?' today':''}${weekend?' weekend':''}" onclick="openPlanCell('${planKey}','${d}')">
+      <div class="pc-num">${d}${isToday?' ·今':''}</div>`;
+    items.forEach(i=>{
+      const a=ACCOUNTS[i.acct];
+      html+=`<div class="pc-item ${a.platform} ${i.acct==='xhs2'?'xhs2':''}" onclick="event.stopPropagation();editPlanItem('${planKey}','${d}',${items.indexOf(i)})" ontouchstart="event.stopPropagation();planLongPressStart('${planKey}','${d}',${items.indexOf(i)},this)" ontouchend="planLongPressEnd(this)" ontouchmove="planLongPressEnd(this)">${a.emoji} ${i.title}</div>`;
+    });
+    if(items.length===0) html+=`<div class="pc-add">+</div>`;
+    html+='</div>';
+  }
+  // 填充下月开头(凑满整行)
+  const total=firstDay+daysInMonth;
+  const remain=(7-total%7)%7;
+  for(let d=1;d<=remain;d++){
+    html+=`<div class="pcell other-month" onclick="openPlanCell('${year}-${pad(month+2)}','${d}')">
+      <div class="pc-num">${d}</div>
+      <div class="pc-add">+</div>
+    </div>`;
+  }
+  html+='</div>';
+  html+='</div>'; // 关闭 plan-scroll
+  document.getElementById('planCalendar').innerHTML=html;
+}
+function openPlanCell(planKey,day){
+  if(!window.DATA.plan[planKey]) window.DATA.plan[planKey]={};
+  if(!window.DATA.plan[planKey][day]) window.DATA.plan[planKey][day]=[];
+  document.getElementById('planDay').value=planKey;
+  document.getElementById('planSlot').value=day;
+  document.getElementById('planTitle').value='';
+  document.querySelectorAll('#planAcctChips .chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  document.getElementById('planModalTitle').innerHTML=`添加计划 · ${planKey} 第${day}天 <span class="close" onclick="closeModal('planModal')">×</span>`;
+  document.getElementById('planModal').classList.add('show');
+  setTimeout(()=>document.getElementById('planTitle').focus(),100);
+}
+function savePlan(){
+  const planKey=document.getElementById('planDay').value;
+  const day=document.getElementById('planSlot').value;
+  const title=document.getElementById('planTitle').value.trim();
+  if(!title){alert('请输入内容标题');return}
+  const acct=document.querySelector('#planAcctChips .chip.active').dataset.v;
+  if(!window.DATA.plan[planKey]) window.DATA.plan[planKey]={};
+  if(!window.DATA.plan[planKey][day]) window.DATA.plan[planKey][day]=[];
+  window.DATA.plan[planKey][day].push({acct,title});
+  save();closeModal('planModal');renderPlan();
+}
+
+/* 计划项:单击编辑,长按删除 */
+function editPlanItem(planKey,day,idx){
+  const items=window.DATA.plan[planKey][day];
+  if(!items||!items[idx]) return;
+  const item=items[idx];
+  const newTitle=prompt('编辑内容标题:',item.title);
+  if(newTitle===null) return; // 取消
+  if(!newTitle.trim()){alert('标题不能为空');return}
+  item.title=newTitle.trim();
+  save();renderPlan();
+}
+let _planPressTimer=null,_planPressFired=false;
+function planLongPressStart(planKey,day,idx,el){
+  _planPressFired=false;
+  el.style.opacity='.6';
+  _planPressTimer=setTimeout(()=>{
+    _planPressFired=true;
+    const items=window.DATA.plan[planKey][day];
+    if(!items||!items[idx]) return;
+    const title=items[idx].title;
+    if(confirm(`删除计划项「${title}」?`)){
+      items.splice(idx,1);
+      save();renderPlan();
+    }
+  },650);
+}
+function planLongPressEnd(el){
+  el.style.opacity='1';
+  if(_planPressTimer){clearTimeout(_planPressTimer);_planPressTimer=null}
+}
+document.addEventListener('click',e=>{
+  if(_planPressFired){e.preventDefault();e.stopPropagation();_planPressFired=false}
+},true);
+
+/* ============ 内容管理 ============ */
+let currentFilter='all';
+function renderContentTabs(){
+  const D=window.DATA;
+  const counts={all:D.contents.length};
+  Object.keys(ACCOUNTS).forEach(k=>counts[k]=D.contents.filter(c=>c.acct===k).length);
+  const tabs=[
+    {k:'all',label:'全部'},
+    {k:'xhs1',label:'📕 墩墩比熊妹(红书)'},
+    {k:'xhs2',label:'📚 小旅嗨(红书)'},
+    {k:'dy1',label:'🎵 墩墩比熊妹(抖音)'}
+  ];
+  document.getElementById('contentTabs').innerHTML=tabs.map(t=>
+    `<div class="tab ${currentFilter===t.k?'active':''}" onclick="filterContent('${t.k}')">${t.label}<span class="cnt">${counts[t.k]||0}</span></div>`
+  ).join('');
+}
+function filterContent(k){
+  currentFilter=k;
+  switchView('content');
+  renderContentTabs();renderContentList();
+}
+const STATUS_MAP={draft:'草稿',scheduled:'已排期',published:'已发布',failed:'未通过'};
+function renderContentList(){
+  const D=window.DATA;
+  let list=D.contents;
+  if(currentFilter!=='all') list=list.filter(c=>c.acct===currentFilter);
+  list=[...list].sort((a,b)=>(b.time||'').localeCompare(a.time||''));
+  const el=document.getElementById('contentList');
+  if(list.length===0){
+    el.innerHTML='<div class="empty"><div class="ico">📝</div>暂无内容,点击右上角新建</div>';return;
+  }
+  el.innerHTML=list.map(c=>{
+    const a=ACCOUNTS[c.acct];
+    return `<div class="content-item" data-cid="${c.id}" onclick="editContent(${c.id})" ontouchstart="longPressStart(${c.id},this)" ontouchend="longPressEnd(this)" ontouchmove="longPressEnd(this)" onmousedown="longPressStart(${c.id},this)" onmouseup="longPressEnd(this)" onmouseleave="longPressEnd(this)">
+      <div class="ci-del-hint">松开删除</div>
+      <div class="ci-head">
+        <div class="ci-title">${c.title||'(无标题)'}</div>
+        <div class="ci-status ${c.status}">${STATUS_MAP[c.status]}</div>
+      </div>
+      <div class="ci-meta">
+        <span class="pill ${a.platform} ${c.acct==='xhs2'?'xhs2':''}">${a.platformName}·${a.name}</span>
+        <span class="pill">${c.category}</span>
+        ${c.time?`<span>📅 ${c.time.slice(5,16).replace('T',' ')}</span>`:''}
+      </div>
+      ${c.content?`<div class="ci-body">${c.content}</div><span class="ci-toggle" onclick="event.stopPropagation();toggleBody(this)">展开正文 ▾</span>`:''}
+    </div>`;
+  }).join('');
+}
+/* 长按删除 */
+let _pressTimer=null,_pressFired=false;
+function longPressStart(id,el){
+  _pressFired=false;
+  el.classList.add('press');
+  _pressTimer=setTimeout(()=>{
+    _pressFired=true;
+    if(confirm('删除这条内容?\n「'+(window.DATA.contents.find(c=>c.id===id)||{}).title+'」')){
+      window.DATA.contents=window.DATA.contents.filter(c=>c.id!==id);
+      window.DATA.reviews=window.DATA.reviews.filter(r=>r.contentId!==id);
+      save();renderContentTabs();renderContentList();renderOverview();
+    }
+  },650);
+}
+function longPressEnd(el){
+  el.classList.remove('press');
+  if(_pressTimer){clearTimeout(_pressTimer);_pressTimer=null}
+}
+// 屏蔽长按后的点击(避免删除后还弹编辑窗)
+document.addEventListener('click',e=>{
+  if(_pressFired){e.preventDefault();e.stopPropagation();_pressFired=false}
+},true);
+function toggleBody(el){
+  const card=el.closest('.content-item');
+  if(card) card.classList.toggle('expanded');
+  el.textContent=card&&card.classList.contains('expanded')?'收起正文 ▴':'展开正文 ▾';
+}
+function editContent(id){
+  openContentModal(id);
+}
+
+/* ============ 数据复盘 ============ */
+function renderReview(){
+  const D=window.DATA;
+  const el=document.getElementById('reviewGrid');
+  const published=D.contents.filter(c=>c.status==='published');
+  if(published.length===0){
+    el.innerHTML='<div class="empty"><div class="ico">📈</div>暂无已发布内容的数据</div>';return;
+  }
+  el.innerHTML=published.map(c=>{
+    const a=ACCOUNTS[c.acct];
+    const r=D.reviews.find(r=>r.contentId===c.id)||{views:0,likes:0,comments:0,shares:0};
+    const engagement=r.views>0?((r.likes+r.comments+r.shares)/r.views*100).toFixed(1):0;
+    const advice=genAdvice(c,r,engagement);
+    return `<div class="review-card">
+      <div class="rc-head">
+        <div class="rc-title">${c.title}</div>
+        <span class="rc-platform ${a.platform} ${c.acct==='xhs2'?'xhs2':''}">${a.platformName}</span>
+      </div>
+      <div class="rc-stats">
+        <div class="rc-stat"><div class="v">${formatNum(r.views)}</div><div class="l">播放</div></div>
+        <div class="rc-stat"><div class="v">${formatNum(r.likes)}</div><div class="l">点赞</div></div>
+        <div class="rc-stat"><div class="v">${formatNum(r.comments)}</div><div class="l">评论</div></div>
+        <div class="rc-stat"><div class="v">${formatNum(r.shares)}</div><div class="l">分享</div></div>
+      </div>
+      <div class="rc-advice">💡 ${advice}</div>
+    </div>`;
+  }).join('');
+}
+function genAdvice(c,r,eng){
+  const tips=[];
+  if(r.views<10000) tips.push('播放量偏低,建议优化标题(加入热词)和封面');
+  if(r.views>=10000&&eng<3) tips.push('互动率偏低,可在结尾加引导语"评论区聊聊"');
+  if(r.views>=10000&&eng>=3&&eng<6) tips.push('数据不错,可尝试加话题标签扩大曝光');
+  if(eng>=6) tips.push('互动率优秀!建议同步到另一平台,放大流量');
+  if(r.shares<r.likes*0.05) tips.push('分享率低,内容干货性可加强(收藏向)');
+  if(r.comments<r.likes*0.03) tips.push('评论少,可在文案中抛出争议性问题');
+  return tips.length?tips.join(';'):'数据稳定,保持更新节奏即可';
+}
+
+/* ============ 爆款情报 ============ */
+let currentHot='xhs';
+function renderHot(){
+  const D=window.DATA;
+  document.querySelectorAll('.hot-tab').forEach(t=>t.classList.toggle('active',t.dataset.platform===currentHot));
+  const list=D.hot[currentHot];
+  document.getElementById('hotList').innerHTML=list.map(h=>{
+    const rc=h.recur==='high'?'<span class="recur high">二创★'+h.recurScore+'</span>':'<span class="recur">二创'+h.recurScore+'</span>';
+    return `<div class="hot-item">
+      <div class="hot-rank r${h.rank}">${h.rank}</div>
+      <div class="hot-body">
+        <div class="hot-title">${h.title}</div>
+        <div class="hot-meta">
+          <span class="author">@${h.author}</span>
+          <span>🔥 ${h.likes}赞</span>
+          <span>👁 ${h.views}播放</span>
+          ${rc}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('hotUpdateTime').textContent='更新于 '+new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'});
+
+  // 热词
+  document.getElementById('hotWords').innerHTML=D.hotWords.map(w=>
+    `<div class="hot-word lvl${w.lvl}">${w.word}<span class="heat">${w.heat}</span></div>`
+  ).join('');
+
+  // 二创
+  document.getElementById('recurList').innerHTML=D.recurContents.map(r=>
+    `<div class="recur-card">
+      <div class="rc-score">二创分 ${r.score}</div>
+      <div class="rc-cat">${r.cat}</div>
+      <div class="rc-t">${r.title}</div>
+      <div class="rc-why">${r.why}</div>
+    </div>`
+  ).join('');
+}
+document.querySelectorAll('.hot-tab').forEach(t=>t.onclick=()=>{currentHot=t.dataset.platform;renderHot()});
+
+/* ============ 弹窗 ============ */
+function openTaskModal(){
+  document.getElementById('taskEditId').value='';
+  document.getElementById('taskInput').value='';
+  document.getElementById('taskTime').value='';
+  document.getElementById('taskAcct').value='';
+  document.querySelectorAll('#taskPrio .chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  document.getElementById('taskModalTitle').innerHTML='添加任务 <span class="close" onclick="closeModal(\'taskModal\')">×</span>';
+  document.getElementById('taskModal').classList.add('show');
+  setTimeout(()=>document.getElementById('taskInput').focus(),100);
+}
+
+/* 统计编辑 */
+function openStatModal(field,label,tip){
+  document.getElementById('statField').value=field;
+  document.getElementById('statLabel').textContent=label+(tip?' ('+tip+')':'');
+  document.getElementById('statModalTitle').innerHTML='修改'+label+' <span class="close" onclick="closeModal(\'statModal\')">×</span>';
+  document.getElementById('statInput').value=window.DATA.stats[field]||0;
+  document.getElementById('statModal').classList.add('show');
+  setTimeout(()=>document.getElementById('statInput').focus(),100);
+}
+function saveStat(){
+  const field=document.getElementById('statField').value;
+  const raw=document.getElementById('statInput').value.trim();
+  if(!raw){alert('请输入数值');return}
+  // 支持输入 "1.2w" "12800" 等
+  let num=parseStatNum(raw);
+  if(isNaN(num)){alert('请输入有效数字,如 0、12800、1.2w');return}
+  window.DATA.stats[field]=num;
+  save();closeModal('statModal');
+  renderOverview();
+}
+function parseStatNum(s){
+  s=s.replace(/,/g,'').trim().toLowerCase();
+  if(/w$/.test(s)) return Math.round(parseFloat(s)*10000);
+  if(/k$/.test(s)) return Math.round(parseFloat(s)*1000);
+  return parseInt(s,10);
+}
+function openContentModal(id){
+  const c=id?window.DATA.contents.find(c=>c.id===id):null;
+  document.getElementById('contentModalTitle').innerHTML=(c?'编辑内容':'新建内容')+' <span class="close" onclick="closeModal(\'contentModal\')">×</span>';
+  document.getElementById('contentId').value=id||'';
+  document.getElementById('cAcct').value=c?c.acct:'xhs1';  document.getElementById('cTitle').value=c?c.title:'';
+  document.getElementById('cCategory').value=c?c.category:'日常分享';
+  document.getElementById('cContent').value=c?c.content:'';
+  document.getElementById('cStatus').value=c?c.status:'draft';
+  document.getElementById('cTime').value=c?(c.time||''):'';
+  toggleTimeField();
+  document.getElementById('contentModal').classList.add('show');
+}
+function toggleTimeField(){
+  const st=document.getElementById('cStatus').value;
+  const g=document.getElementById('cTimeGroup');
+  // 已发布时隐藏时间选择(避免无法保存),其他状态显示
+  if(st==='published'){
+    g.style.display='none';
+    document.getElementById('cTime').value='';  // 清空,避免校验冲突
+  }else{
+    g.style.display='';
+  }
+}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+function saveContent(){
+  const id=document.getElementById('contentId').value;
+  const data={
+    acct:document.getElementById('cAcct').value,
+    title:document.getElementById('cTitle').value.trim(),
+    category:document.getElementById('cCategory').value,
+    content:document.getElementById('cContent').value.trim(),
+    status:document.getElementById('cStatus').value,
+    time:document.getElementById('cTime').value
+  };
+  if(!data.title){alert('请输入标题');return}
+  if(id){
+    const c=window.DATA.contents.find(c=>c.id==id);
+    Object.assign(c,data);
+  }else{
+    data.id=Date.now();
+    window.DATA.contents.push(data);
+  }
+  save();closeModal('contentModal');
+  renderContentTabs();renderContentList();renderOverview();
+}
+function deleteContent(){
+  const id=document.getElementById('contentId').value;
+  if(!id){closeModal('contentModal');return}
+  if(!confirm('删除这条内容?')) return;
+  window.DATA.contents=window.DATA.contents.filter(c=>c.id!=id);
+  window.DATA.reviews=window.DATA.reviews.filter(r=>r.contentId!=id);
+  save();closeModal('contentModal');
+  renderContentTabs();renderContentList();renderOverview();
+}
+
+// 弹窗芯片选择
+document.querySelectorAll('#taskPrio .chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('#taskPrio .chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');
+});
+document.querySelectorAll('#planAcctChips .chip').forEach(c=>c.onclick=()=>{
+  document.querySelectorAll('#planAcctChips .chip').forEach(x=>x.classList.remove('active'));
+  c.classList.add('active');
+});
+// 点击遮罩关闭
+document.querySelectorAll('.modal-mask').forEach(m=>m.onclick=e=>{if(e.target===m)m.classList.remove('show')});
+
+/* ============ 初始化 ============ */
+initDate();
+renderOverview();
+renderTasks();
+renderPlan();
+renderContentTabs();
+renderContentList();
+renderReview();
+renderHot();
+</script>
+</body>
+</html>
