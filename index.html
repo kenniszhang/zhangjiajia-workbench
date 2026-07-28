@@ -1362,15 +1362,21 @@ function toggleTimeField(){
   if(st==='published'){
     label.textContent='发布日期';
     g.style.display='';
-    // 只在完全为空时才填今天(编辑已有内容时保留原值)
+    // 只在完全为空时才填当前实时时间(编辑已有内容时保留原值)
     if(!document.getElementById('cTime').value){
       const now=new Date();
-      const ds=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T00:00`;
+      const ds=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
       document.getElementById('cTime').value=ds;
     }
   }else if(st==='scheduled'){
     label.textContent='计划发布时间';
     g.style.display='';
+    // 计划发布也默认填当前时间
+    if(!document.getElementById('cTime').value){
+      const now=new Date();
+      const ds=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      document.getElementById('cTime').value=ds;
+    }
   }else{
     label.textContent='计划发布时间';
     g.style.display='none';
