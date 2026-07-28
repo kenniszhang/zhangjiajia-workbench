@@ -1347,7 +1347,10 @@ function openContentModal(id){
   const c=id?window.DATA.contents.find(c=>c.id===id):null;
   document.getElementById('contentModalTitle').innerHTML=(c?'编辑内容':'新建内容')+' <span class="close" onclick="closeModal(\'contentModal\')">×</span>';
   document.getElementById('contentId').value=id||'';
-  document.getElementById('cAcct').value=c?c.acct:'xhs1';  document.getElementById('cTitle').value=c?c.title:'';
+  // 新建时:如果当前在某账号tab下,默认选该账号;全部tab下默认第一个
+  const defaultAcct=c?c.acct:(currentFilter!=='all'?currentFilter:'xhs1');
+  document.getElementById('cAcct').value=defaultAcct;
+  document.getElementById('cTitle').value=c?c.title:'';
   document.getElementById('cCategory').value=c?c.category:'日常分享';
   document.getElementById('cContent').value=c?c.content:'';
   document.getElementById('cStatus').value=c?c.status:'draft';
