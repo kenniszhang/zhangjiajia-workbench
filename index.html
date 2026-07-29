@@ -31,6 +31,19 @@
   --radius-sm:8px;
   --shadow:0 4px 20px rgba(0,0,0,.3);
 }
+/* 日间模式(7:30-19:30) */
+html.day-mode{
+  --bg:#f5f6f8;
+  --bg-card:#ffffff;
+  --bg-card-2:#eef1f5;
+  --bg-hover:#e8ecf0;
+  --border:#dde2e8;
+  --text:#1a2028;
+  --text-muted:#6b7280;
+  --text-dim:#9ca3af;
+  --primary-soft:rgba(255,36,66,.1);
+  --shadow:0 4px 20px rgba(0,0,0,.08);
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
 body{min-height:100vh;padding-bottom:80px}
@@ -764,6 +777,14 @@ function initDate(){
   document.getElementById('greetText').textContent=greet+'!';
   const tips=['今天是复盘上周数据、规划本周内容的好时机','记得查看爆款榜,捕捉今日热点','发布内容前先看看热词,优化标题','数据复盘是涨粉的关键,别偷懒','二创内容要趁热,错过热点就晚了'];
   document.getElementById('greetSub').textContent=tips[Math.floor(Math.random()*tips.length)];
+  updateTheme();
+}
+/* 日夜模式切换:7:30-19:30日间,其余夜间 */
+function updateTheme(){
+  const now=new Date();
+  const mins=now.getHours()*60+now.getMinutes();
+  const isDay=mins>=450 && mins<1170; // 7:30=450, 19:30=1170
+  document.documentElement.classList.toggle('day-mode',isDay);
 }
 
 /* ============ 概览 ============ */
@@ -1508,6 +1529,7 @@ document.querySelectorAll('.modal-mask').forEach(m=>m.onclick=e=>{if(e.target===
 
 /* ============ 初始化 ============ */
 initDate();
+setInterval(updateTheme,60000); // 每分钟检查一次日夜模式
 renderOverview();
 renderTasks();
 renderPrep();
