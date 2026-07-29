@@ -222,20 +222,34 @@ body{min-height:100vh;padding-bottom:80px}
 .content-item.press{border-color:var(--warning);background:rgba(251,191,36,.05)}
 .content-item{position:relative}
 
-/* ========== 数据复盘 ========== */
-.review-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
-.review-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
-.review-card .rc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.review-card .rc-title{font-size:14px;font-weight:600;flex:1}
-.review-card .rc-platform{font-size:11px;padding:2px 8px;border-radius:8px}
-.review-card .rc-platform.xhs{background:var(--primary-soft);color:#ff6b80}
-.review-card .rc-platform.xhs2{background:rgba(168,85,247,.15);color:#c084fc}
-.review-card .rc-platform.dy{background:rgba(37,244,238,.12);color:#25f4ee}
-.review-card .rc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
-.review-card .rc-stat{text-align:center;background:var(--bg);border-radius:6px;padding:8px 4px}
-.review-card .rc-stat .v{font-size:16px;font-weight:700}
-.review-card .rc-stat .l{font-size:10px;color:var(--text-muted);margin-top:2px}
-.review-card .rc-advice{font-size:12px;color:var(--warning);background:rgba(251,191,36,.08);border-left:3px solid var(--warning);padding:8px 10px;border-radius:4px;line-height:1.5}
+/* ========== 数据复盘(三列表格) ========== */
+.review-day{margin-bottom:18px}
+.review-day-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.review-day-title .date-badge{background:var(--primary-soft);color:#ff6b80;padding:2px 8px;border-radius:8px;font-size:11px}
+.review-day-title.today .date-badge{background:var(--primary);color:#fff}
+.review-table{width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;table-layout:fixed}
+.review-table th{font-size:11px;color:var(--text-muted);font-weight:600;padding:8px 6px;background:var(--bg-card-2);text-align:center;border-bottom:1px solid var(--border)}
+.review-table td{font-size:12px;padding:8px 6px;border-bottom:1px solid var(--border);vertical-align:top;word-break:break-all;line-height:1.4}
+.review-table tr:last-child td{border-bottom:none}
+.review-table .col-title{width:24%}
+.review-table .col-status{width:24%}
+.review-table .col-detail{width:52%}
+.review-table .rc-title-cell{font-weight:500;color:var(--text)}
+.review-table .rc-status-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 4px;color:var(--text);font-size:11px;font-family:inherit;cursor:pointer}
+.review-table .rc-status-select option{background:var(--bg-card);color:var(--text)}
+.review-table tr.status-flow{background:rgba(255,36,66,.06)}
+.review-table tr.status-1k{background:rgba(59,130,246,.06)}
+.review-table tr.status-10k{background:rgba(251,191,36,.06)}
+.review-table .rc-detail-input{width:100%;background:transparent;border:none;color:var(--text-muted);font-size:12px;font-family:inherit;resize:vertical;min-height:32px;outline:none}
+.review-table .rc-detail-input:focus{color:var(--text)}
+.review-table .rc-detail-input::placeholder{color:var(--text-dim)}
+.review-empty-row td{text-align:center;color:var(--text-dim);font-size:12px;padding:16px}
+@media(max-width:768px){
+  .review-table th{font-size:10px;padding:6px 4px}
+  .review-table td{font-size:11px;padding:6px 4px}
+  .review-table .rc-status-select{font-size:10px;padding:4px 2px}
+  .review-table .rc-detail-input{font-size:11px}
+}
 
 /* ========== 爆款情报 ========== */
 .hot-tabs{display:flex;gap:6px;margin-bottom:14px}
@@ -330,7 +344,6 @@ body{min-height:100vh;padding-bottom:80px}
   .overview{grid-template-columns:repeat(2,1fr)}
   .stat-box .value{font-size:18px}
   .form-row{grid-template-columns:1fr}
-  .review-card .rc-stats{grid-template-columns:repeat(4,1fr)}
   .section-title{font-size:15px}
   .today-hero .greet{font-size:16px}
 }
@@ -415,8 +428,8 @@ body{min-height:100vh;padding-bottom:80px}
 
   <!-- ============ 视图3: 数据复盘 ============ -->
   <div class="view" id="view-review">
-    <div class="section-title"><span class="left">数据复盘 & 优化建议</span><span class="right">点击数据可编辑</span></div>
-    <div class="review-grid" id="reviewGrid"></div>
+    <div class="section-title"><span class="left">数据复盘</span><span class="right">按日期分组 · 状态可下拉选</span></div>
+    <div id="reviewGrid"></div>
   </div>
 
   <!-- ============ 视图4: 爆款情报 ============ -->
@@ -654,7 +667,7 @@ function defaultData(){
       hotContent:0,        // 超500播放量内容数
       scheduled:0          // 待排期数
     },
-    reviews:[],
+    reviews:{}, // {contentId: {status, detail}}
     // 在进行任务(筹备看板) [{id,acct,title,category,content,startDate,endDate,progress,nextStep}]
     preps:[],
     // 本月发布计划: 按月+日存储 {"2026-7":{"15":[{acct,title}],...}}
@@ -1204,7 +1217,7 @@ function longPressStart(id,el){
     _pressFired=true;
     if(confirm('删除这条内容?\n「'+(window.DATA.contents.find(c=>c.id===id)||{}).title+'」')){
       window.DATA.contents=window.DATA.contents.filter(c=>c.id!==id);
-      window.DATA.reviews=window.DATA.reviews.filter(r=>r.contentId!==id);
+      if(window.DATA.reviews && window.DATA.reviews[id]) delete window.DATA.reviews[id];
       save();renderContentTabs();renderContentList();renderOverview();
     }
   },650);
@@ -1226,43 +1239,86 @@ function editContent(id){
   openContentModal(id);
 }
 
-/* ============ 数据复盘 ============ */
+/* ============ 数据复盘(按日期分组三列表格) ============ */
 function renderReview(){
   const D=window.DATA;
+  if(!D.reviews) D.reviews={}; // 改为对象: {contentId: {status, detail}}
   const el=document.getElementById('reviewGrid');
   const published=D.contents.filter(c=>c.status==='published');
-  if(published.length===0){
-    el.innerHTML='<div class="empty"><div class="ico">📈</div>暂无已发布内容的数据</div>';return;
+  // 按日期分组(用time的日期部分,无time的归到"未日期")
+  const groups={};
+  published.forEach(c=>{
+    let dateKey='未日期';
+    if(c.time){
+      const m=c.time.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if(m) dateKey=`${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+    }
+    if(!groups[dateKey]) groups[dateKey]=[];
+    groups[dateKey].push(c);
+  });
+  // 今天的日期
+  const now=new Date();
+  const todayKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  // 确保今天有分组(即使没内容也显示空表)
+  if(!groups[todayKey]) groups[todayKey]=[];
+  // 按日期降序(今天在最上)
+  const sortedKeys=Object.keys(groups).sort((a,b)=>{
+    if(a===todayKey) return -1;
+    if(b===todayKey) return 1;
+    return b.localeCompare(a);
+  });
+  if(sortedKeys.length===0){
+    el.innerHTML='<div class="empty"><div class="ico">📈</div>暂无已发布内容</div>';return;
   }
-  el.innerHTML=published.map(c=>{
-    const a=ACCOUNTS[c.acct];
-    const r=D.reviews.find(r=>r.contentId===c.id)||{views:0,likes:0,comments:0,shares:0};
-    const engagement=r.views>0?((r.likes+r.comments+r.shares)/r.views*100).toFixed(1):0;
-    const advice=genAdvice(c,r,engagement);
-    return `<div class="review-card">
-      <div class="rc-head">
-        <div class="rc-title">${c.title}</div>
-        <span class="rc-platform ${a.platform} ${c.acct==='xhs2'?'xhs2':''}">${a.platformName}</span>
-      </div>
-      <div class="rc-stats">
-        <div class="rc-stat"><div class="v">${formatNum(r.views)}</div><div class="l">播放</div></div>
-        <div class="rc-stat"><div class="v">${formatNum(r.likes)}</div><div class="l">点赞</div></div>
-        <div class="rc-stat"><div class="v">${formatNum(r.comments)}</div><div class="l">评论</div></div>
-        <div class="rc-stat"><div class="v">${formatNum(r.shares)}</div><div class="l">分享</div></div>
-      </div>
-      <div class="rc-advice">💡 ${advice}</div>
+  el.innerHTML=sortedKeys.map(dateKey=>{
+    const items=groups[dateKey];
+    const isToday=dateKey===todayKey;
+    const dateLabel=isToday?`${dateKey} · 今日`:dateKey;
+    let rows=items.map(c=>{
+      const rv=D.reviews[c.id]||{};
+      const st=rv.status||'';
+      const detail=rv.detail||'';
+      const rowClass=st?`status-${st}`:'';
+      return `<tr class="${rowClass}" data-cid="${c.id}">
+        <td class="rc-title-cell">${c.title||'(无标题)'}</td>
+        <td>
+          <select class="rc-status-select" onchange="updateReviewStatus(${c.id},this.value)">
+            <option value=""${st===''?' selected':''}>—</option>
+            <option value="flow"${st==='flow'?' selected':''}>流量激励</option>
+            <option value="1k"${st==='1k'?' selected':''}>播放破千</option>
+            <option value="10k"${st==='10k'?' selected':''}>播放破万</option>
+          </select>
+        </td>
+        <td><textarea class="rc-detail-input" placeholder="记录可优化点/备忘..." onchange="updateReviewDetail(${c.id},this.value)">${detail}</textarea></td>
+      </tr>`;
+    }).join('');
+    if(items.length===0){
+      rows=`<tr class="review-empty-row"><td colspan="3">今日暂无已发布内容,发布后会自动同步到这里</td></tr>`;
+    }
+    return `<div class="review-day${isToday?' today':''}">
+      <div class="review-day-title${isToday?' today':''}"><span class="date-badge">${dateLabel}</span></div>
+      <table class="review-table">
+        <thead><tr>
+          <th class="col-title">标题</th>
+          <th class="col-status">状态</th>
+          <th class="col-detail">详情记录</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
     </div>`;
   }).join('');
 }
-function genAdvice(c,r,eng){
-  const tips=[];
-  if(r.views<10000) tips.push('播放量偏低,建议优化标题(加入热词)和封面');
-  if(r.views>=10000&&eng<3) tips.push('互动率偏低,可在结尾加引导语"评论区聊聊"');
-  if(r.views>=10000&&eng>=3&&eng<6) tips.push('数据不错,可尝试加话题标签扩大曝光');
-  if(eng>=6) tips.push('互动率优秀!建议同步到另一平台,放大流量');
-  if(r.shares<r.likes*0.05) tips.push('分享率低,内容干货性可加强(收藏向)');
-  if(r.comments<r.likes*0.03) tips.push('评论少,可在文案中抛出争议性问题');
-  return tips.length?tips.join(';'):'数据稳定,保持更新节奏即可';
+function updateReviewStatus(cid,status){
+  if(!window.DATA.reviews) window.DATA.reviews={};
+  if(!window.DATA.reviews[cid]) window.DATA.reviews[cid]={};
+  window.DATA.reviews[cid].status=status;
+  save();renderReview();
+}
+function updateReviewDetail(cid,detail){
+  if(!window.DATA.reviews) window.DATA.reviews={};
+  if(!window.DATA.reviews[cid]) window.DATA.reviews[cid]={};
+  window.DATA.reviews[cid].detail=detail;
+  save();
 }
 
 /* ============ 爆款情报 ============ */
@@ -1433,7 +1489,7 @@ function deleteContent(){
   if(!id){closeModal('contentModal');return}
   if(!confirm('删除这条内容?')) return;
   window.DATA.contents=window.DATA.contents.filter(c=>c.id!=id);
-  window.DATA.reviews=window.DATA.reviews.filter(r=>r.contentId!=id);
+  if(window.DATA.reviews && window.DATA.reviews[id]) delete window.DATA.reviews[id];
   save();closeModal('contentModal');
   renderContentTabs();renderContentList();renderOverview();
 }
