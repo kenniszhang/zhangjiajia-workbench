@@ -192,6 +192,32 @@ body{min-height:100vh;padding-bottom:80px}
 .prep-card .prep-foot .prep-edit{color:#a855f7;cursor:pointer}
 .prep-card .prep-foot .prep-to-pub{color:var(--success);cursor:pointer;font-weight:600}
 
+/* ========== 日常&里程碑记录 ========== */
+.milestone-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:8px}
+.milestone-table{width:100%;border-collapse:collapse;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;table-layout:fixed;min-width:320px}
+.milestone-table th{font-size:11px;color:var(--text-muted);font-weight:600;padding:8px 4px;background:var(--bg-card-2);text-align:center;border-bottom:1px solid var(--border);line-height:1.3}
+.milestone-table td{font-size:12px;padding:6px 4px;border-bottom:1px solid var(--border);vertical-align:top;word-break:break-word;line-height:1.4;position:relative}
+.milestone-table tr:last-child td{border-bottom:none}
+.milestone-table .ms-col-date{width:18%}
+.milestone-table .ms-col-acct{width:27.3%}
+.milestone-table .ms-date-input{width:100%;background:transparent;border:none;color:var(--text);font-size:11px;font-family:inherit;outline:none;padding:2px}
+.milestone-table .ms-cell{cursor:pointer;min-height:36px;height:100%}
+.milestone-table .ms-cell-text{font-size:11px;color:var(--text);white-space:pre-wrap;word-break:break-word;min-height:24px;padding:2px}
+.milestone-table .ms-cell-text.empty{color:var(--text-dim);font-style:italic}
+.milestone-table .ms-cell-edit{width:100%;background:var(--bg);border:1px solid var(--primary);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;padding:4px;resize:vertical;min-height:36px}
+.milestone-table .ms-confirm-btn{position:absolute;right:3px;bottom:3px;font-size:9px;background:var(--primary);color:#fff;border:none;border-radius:4px;padding:2px 6px;cursor:pointer;font-weight:600}
+.milestone-table .ms-row-empty td{text-align:center;color:var(--text-dim);font-size:11px}
+.milestone-table tr.acct-dy .ms-cell-text{color:#25f4ee}
+.milestone-table tr.acct-xhs1 .ms-cell-text{color:#ff6b80}
+.milestone-table tr.acct-xhs2 .ms-cell-text{color:#c084fc}
+@media(max-width:768px){
+  .milestone-table th{font-size:10px;padding:6px 3px}
+  .milestone-table td{font-size:10px;padding:4px 3px}
+  .milestone-table .ms-cell-text{font-size:10px}
+  .milestone-table .ms-cell-edit{font-size:10px}
+  .milestone-table .ms-confirm-btn{font-size:8px;padding:1px 5px}
+}
+
 /* ========== 内容管理 ========== */
 .tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .tabs::-webkit-scrollbar{display:none}
@@ -382,6 +408,25 @@ body{min-height:100vh;padding-bottom:80px}
     <div class="section-title"><span class="left">账号概览</span><span class="right">3个账号 · 2个平台</span></div>
     <div class="overview" id="overviewStats"></div>
     <div class="acct-tabs" id="acctGrid"></div>
+
+    <!-- 日常&里程碑记录 -->
+    <div class="section-title" style="margin-top:24px">
+      <span class="left">日常&里程碑记录</span>
+      <span class="right"><a class="btn small" onclick="addMilestoneRow()">＋ 添加行</a></span>
+    </div>
+    <div class="milestone-wrap">
+      <table class="milestone-table" id="milestoneTable">
+        <thead>
+          <tr>
+            <th class="ms-col-date">日期</th>
+            <th class="ms-col-acct">🎵<br>🐶</th>
+            <th class="ms-col-acct">🍠<br>🐶</th>
+            <th class="ms-col-acct">🍠<br>📚</th>
+          </tr>
+        </thead>
+        <tbody id="milestoneBody"></tbody>
+      </table>
+    </div>
 
     <!-- 今日任务回顾 -->
     <div class="section-title"><span class="left">今日任务回顾</span><span class="right"><a class="btn small" onclick="openTaskModal()">＋ 添加任务</a></span></div>
@@ -670,6 +715,8 @@ function defaultData(){
     reviews:{}, // {contentId: {status, detail}}
     // 在进行任务(筹备看板) [{id,acct,title,category,content,startDate,endDate,progress,nextStep}]
     preps:[],
+    // 日常&里程碑记录 [{id,date,dy,xhs1,xhs2}] date="MM-DD"
+    milestones:[],
     // 本月发布计划: 按月+日存储 {"2026-7":{"15":[{acct,title}],...}}
     plan:{},
     // 计划浏览月份偏移(0=当月)
@@ -1160,6 +1207,95 @@ function prepToContent(id){
   // 不删除筹备项,保留看板记录
 }
 
+/* ============ 日常&里程碑记录 ============ */
+function getTodayMD(){
+  const now=new Date();
+  return `${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+}
+function renderMilestone(){
+  const D=window.DATA;
+  if(!D.milestones) D.milestones=[];
+  const el=document.getElementById('milestoneBody');
+  // 已有内容行 + 3个空行
+  const totalRows=D.milestones.length+3;
+  let html='';
+  for(let i=0;i<totalRows;i++){
+    const m=D.milestones[i];
+    if(m){
+      const dateVal=m.date||'';
+      html+=`<tr data-mid="${m.id}">
+        <td><input type="text" class="ms-date-input" value="${dateVal}" placeholder="MM-DD" onchange="updateMilestoneDate(${m.id},this.value)"></td>
+        <td class="ms-cell" onclick="editMilestoneCell(${m.id},'dy',this)">${m.dy?`<div class="ms-cell-text">${escapeHtml(m.dy)}</div>`:'<div class="ms-cell-text empty">点击记录</div>'}</td>
+        <td class="ms-cell" onclick="editMilestoneCell(${m.id},'xhs1',this)">${m.xhs1?`<div class="ms-cell-text">${escapeHtml(m.xhs1)}</div>`:'<div class="ms-cell-text empty">点击记录</div>'}</td>
+        <td class="ms-cell" onclick="editMilestoneCell(${m.id},'xhs2',this)">${m.xhs2?`<div class="ms-cell-text">${escapeHtml(m.xhs2)}</div>`:'<div class="ms-cell-text empty">点击记录</div>'}</td>
+      </tr>`;
+    }else{
+      // 空行:日期默认今天,其他列待录入
+      const todayMD=getTodayMD();
+      html+=`<tr class="ms-row-empty" data-emptyidx="${i}">
+        <td><input type="text" class="ms-date-input" value="${todayMD}" placeholder="MM-DD" onchange="createMilestoneRow(${i},this.value)"></td>
+        <td class="ms-cell" onclick="editEmptyMilestoneCell(${i},'dy',this)"><div class="ms-cell-text empty">点击记录</div></td>
+        <td class="ms-cell" onclick="editEmptyMilestoneCell(${i},'xhs1',this)"><div class="ms-cell-text empty">点击记录</div></td>
+        <td class="ms-cell" onclick="editEmptyMilestoneCell(${i},'xhs2',this)"><div class="ms-cell-text empty">点击记录</div></td>
+      </tr>`;
+    }
+  }
+  el.innerHTML=html;
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function createMilestoneRow(emptyIdx,date){
+  // 把空行转为正式行
+  const m={id:Date.now()+emptyIdx,date:date||getTodayMD(),dy:'',xhs1:'',xhs2:''};
+  // 填充到对应位置(可能中间有空位)
+  while(window.DATA.milestones.length<emptyIdx){
+    window.DATA.milestones.push({id:Date.now()+Math.random(),date:getTodayMD(),dy:'',xhs1:'',xhs2:''});
+  }
+  window.DATA.milestones[emptyIdx]=m;
+  save();renderMilestone();
+}
+function updateMilestoneDate(id,date){
+  const m=window.DATA.milestones.find(m=>m.id===id);
+  if(m){m.date=date;save()}
+}
+function editMilestoneCell(id,field,td){
+  const m=window.DATA.milestones.find(m=>m.id===id);
+  if(!m) return;
+  const oldVal=m[field]||'';
+  td.innerHTML=`<textarea class="ms-cell-edit" autofocus>${escapeHtml(oldVal)}</textarea><button class="ms-confirm-btn" onclick="confirmMilestoneCell(${id},'${field}',this)">确认</button>`;
+  const ta=td.querySelector('textarea');
+  ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();confirmMilestoneCell(id,field,td.querySelector('.ms-confirm-btn'))}};
+}
+function editEmptyMilestoneCell(emptyIdx,field,td){
+  const todayMD=getTodayMD();
+  // 先确保该行已创建
+  if(!window.DATA.milestones[emptyIdx]){
+    createMilestoneRow(emptyIdx,todayMD);
+    // 重新获取td(因为renderMilestone重绘了)
+    setTimeout(()=>{
+      const rows=document.querySelectorAll('#milestoneBody tr');
+      const row=rows[emptyIdx];
+      if(row){const cells=row.querySelectorAll('.ms-cell');const idx={dy:0,xhs1:1,xhs2:2}[field];if(cells[idx])editMilestoneCell(window.DATA.milestones[emptyIdx].id,field,cells[idx]);}
+    },50);
+    return;
+  }
+  const id=window.DATA.milestones[emptyIdx].id;
+  editMilestoneCell(id,field,td);
+}
+function confirmMilestoneCell(id,field,btn){
+  const td=btn.parentElement;
+  const ta=td.querySelector('textarea');
+  const val=ta.value.trim();
+  const m=window.DATA.milestones.find(m=>m.id===id);
+  if(m){m[field]=val;save()}
+  renderMilestone();
+}
+function addMilestoneRow(){
+  const m={id:Date.now(),date:getTodayMD(),dy:'',xhs1:'',xhs2:''};
+  window.DATA.milestones.push(m);
+  save();renderMilestone();
+}
+
 /* ============ 内容管理 ============ */
 let currentFilter='all';
 function renderContentTabs(){
@@ -1510,6 +1646,7 @@ document.querySelectorAll('.modal-mask').forEach(m=>m.onclick=e=>{if(e.target===
 initDate();
 renderOverview();
 renderTasks();
+renderMilestone();
 renderPrep();
 renderPlan();
 renderContentTabs();
