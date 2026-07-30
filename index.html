@@ -692,7 +692,7 @@ body{min-height:100vh;padding-bottom:80px}
 
 <script>
 /* ============ 数据层 ============ */
-const STORAGE_KEY='mtb_data_v6';
+const STORAGE_KEY='mtb_data_v5';
 const ACCOUNTS={
   xhs1:{name:'墩墩比熊妹',platform:'xhs',platformName:'小红书',track:'宠物赛道',emoji:'📕'},
   xhs2:{name:'小旅嗨',platform:'xhs',platformName:'小红书',track:'图文plog赛道',emoji:'📚'},
@@ -785,11 +785,10 @@ function defaultData(){
 function pad(n){return n<10?'0'+n:n}
 function load(){
   try{
-    // 优先读 v6，没有则从 v5 迁移
-    let s=localStorage.getItem(STORAGE_KEY);
+    const s=localStorage.getItem(STORAGE_KEY);
     if(s){
       const d=JSON.parse(s);
-      // 兼容：万一 v6 里还有旧格式的 milestones
+      // 兼容旧 milestones 格式 {dy:[],xhs1:[],xhs2:[]} → {items:[{acct,detail}]}
       if(d.milestones&&d.milestones.length>0&&d.milestones[0].items===undefined){
         d.milestones=d.milestones.map(day=>{
           const items=[];
@@ -798,43 +797,8 @@ function load(){
           (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
           return {id:day.id,date:day.date,items};
         });
+        save(d);
       }
-      // 如果 v6 看起来是空的默认数据，但 v5 有数据，则尝试恢复 v5
-      const looksEmpty=(!d.contents||d.contents.length===0)&&(!d.tasks||d.tasks.filter(t=>!t.done).length===0)&&(!d.milestones||d.milestones.length===0);
-      if(looksEmpty){
-        const v5s=localStorage.getItem('mtb_data_v5');
-        if(v5s){
-          const old=JSON.parse(v5s);
-          if(old.milestones&&old.milestones.length>0){
-            old.milestones=old.milestones.map(day=>{
-              const items=[];
-              (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
-              (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
-              (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
-              return {id:day.id,date:day.date,items};
-            });
-          }
-          save(old);
-          return old;
-        }
-      }
-      return d;
-    }
-    // 没有 v6，从 v5 迁移
-    const v5s=localStorage.getItem('mtb_data_v5');
-    if(v5s){
-      const old=JSON.parse(v5s);
-      if(old.milestones&&old.milestones.length>0){
-        old.milestones=old.milestones.map(day=>{
-          const items=[];
-          (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
-          (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
-          (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
-          return {id:day.id,date:day.date,items};
-        });
-      }
-      const d=old;
-      save(d);
       return d;
     }
   }catch(e){}
