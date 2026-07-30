@@ -787,25 +787,6 @@ function load(){
   try{
     // 优先读 v6，没有则从 v5 迁移
     let s=localStorage.getItem(STORAGE_KEY);
-    if(!s){
-      s=localStorage.getItem('mtb_data_v5');
-      if(s){
-        const old=JSON.parse(s);
-        // 迁移 v5 → v6
-        if(old.milestones&&old.milestones.length>0){
-          old.milestones=old.milestones.map(day=>{
-            const items=[];
-            (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
-            (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
-            (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
-            return {id:day.id,date:day.date,items};
-          });
-        }
-        const d=old;
-        save(d);
-        return d;
-      }
-    }
     if(s){
       const d=JSON.parse(s);
       // 兼容：万一 v6 里还有旧格式的 milestones
@@ -818,6 +799,42 @@ function load(){
           return {id:day.id,date:day.date,items};
         });
       }
+      // 如果 v6 看起来是空的默认数据，但 v5 有数据，则尝试恢复 v5
+      const looksEmpty=(!d.contents||d.contents.length===0)&&(!d.tasks||d.tasks.filter(t=>!t.done).length===0)&&(!d.milestones||d.milestones.length===0);
+      if(looksEmpty){
+        const v5s=localStorage.getItem('mtb_data_v5');
+        if(v5s){
+          const old=JSON.parse(v5s);
+          if(old.milestones&&old.milestones.length>0){
+            old.milestones=old.milestones.map(day=>{
+              const items=[];
+              (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
+              (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
+              (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
+              return {id:day.id,date:day.date,items};
+            });
+          }
+          save(old);
+          return old;
+        }
+      }
+      return d;
+    }
+    // 没有 v6，从 v5 迁移
+    const v5s=localStorage.getItem('mtb_data_v5');
+    if(v5s){
+      const old=JSON.parse(v5s);
+      if(old.milestones&&old.milestones.length>0){
+        old.milestones=old.milestones.map(day=>{
+          const items=[];
+          (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
+          (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
+          (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
+          return {id:day.id,date:day.date,items};
+        });
+      }
+      const d=old;
+      save(d);
       return d;
     }
   }catch(e){}
@@ -1259,10 +1276,17 @@ function getTodayFull(){
   const now=new Date();
   return `${now.getMonth()+1}月${now.getDate()}日`;
 }
+function getTodayFullFor(dateStr){
+  if(!dateStr) return '未命名';
+  const [m,d]=String(dateStr).split('-').map(Number);
+  if(!m||!d) return String(dateStr);
+  return `${m}月${d}日`;
+}
 function getWeekday(dateStr){
-  // dateStr: "MM-DD" 格式，如 "7-30"
+  if(!dateStr) return '';
+  const [m,d]=String(dateStr).split('-').map(Number);
+  if(!m||!d) return '';
   const now=new Date();
-  const [m,d]=dateStr.split('-').map(Number);
   const dt=new Date(now.getFullYear(),m-1,d);
   const wds=['日','一','二','三','四','五','六'];
   return '星期'+wds[dt.getDay()];
@@ -1273,6 +1297,17 @@ function renderMilestone(){
   if(!D.milestones) D.milestones=[];
   const el=document.getElementById('milestoneBoard');
 
+  // 清理脏数据：确保每项都有 date、items 是数组
+  D.milestones=D.milestones.filter(d=>d&&d.date).map(d=>{
+    if(!Array.isArray(d.items)) d.items=[];
+    d.items=d.items.filter(i=>i).map(i=>{
+      if(!i.acct) i.acct='dy1';
+      if(!i.detail) i.detail='';
+      return i;
+    });
+    return d;
+  });
+
   // 确保今天有日期块（没有记录也可以有空块）
   const today=getTodayMD();
   if(!D.milestones.find(d=>d.date===today)){
@@ -1280,10 +1315,12 @@ function renderMilestone(){
     save();
   }
 
-  // 按日期排序（最新在上）
+  // 按日期排序（最新在上），非法日期排最后
   D.milestones.sort((a,b)=>{
-    const [am,ad]=a.date.split('-').map(Number);
-    const [bm,bd]=b.date.split('-').map(Number);
+    const pa=String(a.date).split('-').map(Number);
+    const pb=String(b.date).split('-').map(Number);
+    const [am,ad]=pa.length===2&&pa[0]?pa:[0,0];
+    const [bm,bd]=pb.length===2&&pb[0]?pb:[0,0];
     return bm!==am?bm-am:bd-ad;
   });
 
@@ -1301,14 +1338,14 @@ function renderMilestone(){
 
   D.milestones.forEach(day=>{
     const items=day.items||[];
-    if(items.length===0) return; // 跳过空日期
+    if(items.length===0) return;
     const fullDate=getTodayFullFor(day.date);
     const wd=getWeekday(day.date);
     html+=`<div class="ms-date-row" data-mid="${day.id}">
       <span class="ms-date-label">${fullDate}</span>
       <span class="ms-date-weekday">${wd}</span>
       <button class="ms-date-add" onclick="addMsRow(${day.id})">+ 添加</button>
-      <span class="ms-date-del" onclick="delMsDateGroup('${day.date}')" title="删除该日期全部记录">×</span>
+      <span class="ms-date-del" onclick="delMsDateGroup('${day.date.replace(/'/g,"\\'")}')" title="删除该日期全部记录">×</span>
     </div>`;
     items.forEach(item=>{
       html+=`<div class="ms-row" data-mid="${day.id}" data-iid="${item.id}">
@@ -1329,12 +1366,6 @@ function renderMilestone(){
 
   html+=`</div>`;
   el.innerHTML=html;
-}
-// dateStr "MM-DD" → "M月D日"
-function getTodayFullFor(dateStr){
-  const [m,d]=dateStr.split('-').map(Number);
-  return `${m}月${d}日`;
-}
 }
 function delMsDateGroup(date){
   const full=getTodayFullFor(date)+' '+getWeekday(date);
