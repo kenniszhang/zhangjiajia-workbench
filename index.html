@@ -194,30 +194,50 @@ body{min-height:100vh;padding-bottom:80px}
 
 /* ========== 日常&里程碑记录 ========== */
 .ms-board{margin-bottom:8px}
-.ms-day{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:8px}
-.ms-day-head{display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-card-2);border-bottom:1px solid var(--border)}
-.ms-day-head .ms-date{font-size:12px;font-weight:700;color:var(--text);background:transparent;border:none;outline:none;width:70px;font-family:inherit}
-.ms-day-head .ms-add-btn{margin-left:auto;font-size:11px;color:var(--primary);cursor:pointer;padding:2px 8px;background:var(--primary-soft);border-radius:8px}
-.ms-day-head .ms-del-day{font-size:14px;color:var(--text-dim);cursor:pointer;padding:0 4px}
-.ms-day-body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)}
-.ms-col{background:var(--bg-card);padding:4px;min-height:36px;position:relative}
-.ms-col-label{font-size:9px;color:var(--text-dim);text-align:center;padding-bottom:3px;border-bottom:1px solid var(--border);margin-bottom:3px}
-.ms-cell{cursor:pointer;padding:4px;min-height:28px;border-radius:4px;transition:.15s;margin-bottom:2px;position:relative}
-.ms-cell:active{background:var(--bg-hover)}
-.ms-cell-text{font-size:11px;color:var(--text);white-space:pre-wrap;word-break:break-word;line-height:1.4}
-.ms-cell-text.empty{color:var(--text-dim);font-size:10px}
-.ms-col.dy .ms-cell-text{color:#25f4ee}
-.ms-col.xhs1 .ms-cell-text{color:#ff6b80}
-.ms-col.xhs2 .ms-cell-text{color:#c084fc}
-.ms-cell-edit{width:100%;background:var(--bg);border:1px solid var(--primary);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;padding:4px;resize:vertical;min-height:32px}
-.ms-confirm-btn{display:block;margin:3px auto 0;font-size:9px;background:var(--primary);color:#fff;border:none;border-radius:4px;padding:2px 10px;cursor:pointer;font-weight:600}
-.ms-cell-del{position:absolute;top:1px;right:1px;font-size:11px;color:var(--text-dim);cursor:pointer;width:16px;height:16px;text-align:center;line-height:16px;border-radius:50%;opacity:0;transition:.15s}
-.ms-cell:hover .ms-cell-del{opacity:.7}
-.ms-cell-del:active{opacity:1}
+.ms-table-wrapper{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+/* 表头 */
+.ms-table-header{display:flex;background:var(--bg-card-2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text-muted)}
+.ms-th-acct{width:120px;min-width:120px;padding:7px 8px;border-right:1px solid var(--border)}
+.ms-th-detail{flex:1;padding:7px 8px}
+/* 日期行（合并整行） */
+.ms-date-row{display:flex;align-items:center;padding:8px 12px;background:var(--bg-card-2);border-bottom:1px solid var(--border);gap:8px}
+.ms-date-label{font-size:13px;font-weight:700;color:var(--text)}
+.ms-date-input{font-size:12px;font-weight:700;color:var(--text);background:transparent;border:none;outline:none;font-family:inherit;width:100px}
+.ms-date-input:focus{color:var(--primary)}
+.ms-date-weekday{font-size:11px;color:var(--text-dim);margin-left:2px}
+.ms-date-del{font-size:12px;color:var(--text-dim);cursor:pointer;margin-left:auto;opacity:0;transition:.15s;padding:2px 6px}
+.ms-date-row:hover .ms-date-del{opacity:.7}
+.ms-date-add{font-size:11px;color:var(--primary);cursor:pointer;padding:2px 10px;background:var(--primary-soft);border-radius:8px;border:none;font-family:inherit;font-weight:600}
+/* 数据行 */
+.ms-row{display:flex;align-items:stretch;border-bottom:1px solid var(--border)}
+.ms-row:last-child{border-bottom:none}
+.ms-row-c2{width:120px;min-width:120px;display:flex;align-items:center;padding:4px 6px;border-right:1px solid var(--border);background:var(--bg-card)}
+.ms-row-c3{flex:1;display:flex;align-items:center;padding:4px 6px;background:var(--bg-card);position:relative;min-height:36px;gap:4px}
+.ms-acct-sel{width:100%;font-size:11px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:3px 4px;font-family:inherit;outline:none;cursor:pointer}
+.ms-acct-sel:focus{border-color:var(--primary)}
+.ms-detail{cursor:pointer;padding:3px 6px;min-height:28px;border-radius:4px;transition:.15s;flex:1;display:flex;align-items:center;font-size:11px;color:var(--text);white-space:pre-wrap;word-break:break-word;line-height:1.4}
+.ms-detail:active{background:var(--bg-hover)}
+.ms-detail.empty{color:var(--text-dim);font-size:10px}
+.ms-detail.acct-dy{color:#25f4ee}
+.ms-detail.acct-xhs1{color:#ff6b80}
+.ms-detail.acct-xhs2{color:#c084fc}
+.ms-edit-area{width:100%;background:var(--bg);border:1px solid var(--primary);border-radius:4px;color:var(--text);font-size:11px;font-family:inherit;outline:none;padding:4px;resize:vertical;min-height:32px}
+.ms-row-confirm{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.ms-confirm-btn{font-size:9px;background:var(--primary);color:#fff;border:none;border-radius:4px;padding:2px 10px;cursor:pointer;font-weight:600;white-space:nowrap}
+.ms-cancel-btn{font-size:9px;background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:2px 8px;cursor:pointer;white-space:nowrap}
+.ms-row-del{font-size:13px;color:var(--text-dim);cursor:pointer;padding:0 4px;display:flex;align-items:center;opacity:0;transition:.15s;flex-shrink:0}
+.ms-row:hover .ms-row-del{opacity:.7}
+.ms-row-del:active{opacity:1}
+.ms-empty-hint{text-align:center;padding:24px;color:var(--text-dim);font-size:13px}
+.ms-empty-hint .ms-start-btn{display:inline-block;margin-top:8px;font-size:12px;color:var(--primary);cursor:pointer;padding:4px 16px;background:var(--primary-soft);border-radius:8px;font-weight:600}
 @media(max-width:768px){
-  .ms-day-head .ms-date{font-size:11px;width:60px}
-  .ms-cell-text{font-size:10px}
-  .ms-cell-edit{font-size:10px}
+  .ms-th-acct{width:90px;min-width:90px}
+  .ms-row-c2{width:90px;min-width:90px}
+  .ms-date-label{font-size:12px}
+  .ms-date-input{font-size:11px;width:80px}
+  .ms-acct-sel{font-size:10px}
+  .ms-detail{font-size:10px}
+  .ms-edit-area{font-size:10px}
 }
 
 /* ========== 内容管理 ========== */
@@ -414,9 +434,9 @@ body{min-height:100vh;padding-bottom:80px}
     <!-- 日常&里程碑记录 -->
     <div class="section-title" style="margin-top:24px">
       <span class="left">日常&里程碑记录</span>
-      <span class="right"><a class="btn small" onclick="addMilestoneDate()">＋ 添加日期</a></span>
+      <span class="right"><a class="btn small" onclick="addMsRowByDate()">＋ 添加行</a></span>
     </div>
-    <div class="ms-board" id="milestoneBoard"></div>
+    <div id="milestoneBoard"></div>
 
     <!-- 今日任务回顾 -->
     <div class="section-title"><span class="left">今日任务回顾</span><span class="right"><a class="btn small" onclick="openTaskModal()">＋ 添加任务</a></span></div>
@@ -672,7 +692,7 @@ body{min-height:100vh;padding-bottom:80px}
 
 <script>
 /* ============ 数据层 ============ */
-const STORAGE_KEY='mtb_data_v5';
+const STORAGE_KEY='mtb_data_v6';
 const ACCOUNTS={
   xhs1:{name:'墩墩比熊妹',platform:'xhs',platformName:'小红书',track:'宠物赛道',emoji:'📕'},
   xhs2:{name:'小旅嗨',platform:'xhs',platformName:'小红书',track:'图文plog赛道',emoji:'📚'},
@@ -705,7 +725,7 @@ function defaultData(){
     reviews:{}, // {contentId: {status, detail}}
     // 在进行任务(筹备看板) [{id,acct,title,category,content,startDate,endDate,progress,nextStep}]
     preps:[],
-    // 日常&里程碑记录 [{id,date,dy:[],xhs1:[],xhs2:[]}] 每个账号列是独立数组
+    // 日常&里程碑记录 [{id,date,items:[{id,acct,detail}]}]
     milestones:[],
     // 本月发布计划: 按月+日存储 {"2026-7":{"15":[{acct,title}],...}}
     plan:{},
@@ -766,7 +786,20 @@ function pad(n){return n<10?'0'+n:n}
 function load(){
   try{
     const s=localStorage.getItem(STORAGE_KEY);
-    if(s) return JSON.parse(s);
+    if(s){
+      const d=JSON.parse(s);
+      // 数据迁移：v5 milestones [{id,date,dy:[],xhs1:[],xhs2:[]}] → v6 [{id,date,items:[{id,acct,detail}]}]
+      if(d.milestones&&d.milestones.length>0&&d.milestones[0].items===undefined){
+        d.milestones=d.milestones.map(day=>{
+          const items=[];
+          (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
+          (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
+          (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
+          return {id:day.id,date:day.date,items};
+        });
+      }
+      return d;
+    }
   }catch(e){}
   const d=defaultData();
   save(d);
@@ -1202,114 +1235,160 @@ function getTodayMD(){
   const now=new Date();
   return `${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
 }
+function getTodayFull(){
+  const now=new Date();
+  return `${now.getMonth()+1}月${now.getDate()}日`;
+}
+function getWeekday(dateStr){
+  // dateStr: "MM-DD" 格式，如 "7-30"
+  const now=new Date();
+  const [m,d]=dateStr.split('-').map(Number);
+  const dt=new Date(now.getFullYear(),m-1,d);
+  const wds=['日','一','二','三','四','五','六'];
+  return '星期'+wds[dt.getDay()];
+}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderMilestone(){
   const D=window.DATA;
   if(!D.milestones) D.milestones=[];
   const el=document.getElementById('milestoneBoard');
-  if(D.milestones.length===0){
-    // 默认创建今天的空日期块
-    D.milestones.push({id:Date.now(),date:getTodayMD(),dy:[],xhs1:[],xhs2:[]});
+
+  // 确保今天有日期块（没有记录也可以有空块）
+  const today=getTodayMD();
+  if(!D.milestones.find(d=>d.date===today)){
+    D.milestones.push({id:Date.now(),date:today,items:[]});
     save();
   }
-  el.innerHTML=D.milestones.map(day=>{
-    return `<div class="ms-day" data-mid="${day.id}">
-      <div class="ms-day-head">
-        <input type="text" class="ms-date" value="${day.date||''}" placeholder="MM-DD" onchange="updateMilestoneDate(${day.id},this.value)">
-        <span class="ms-add-btn" onclick="addMilestoneCell(${day.id},'dy')">+🎵</span>
-        <span class="ms-add-btn" onclick="addMilestoneCell(${day.id},'xhs1')">+🍠🐶</span>
-        <span class="ms-add-btn" onclick="addMilestoneCell(${day.id},'xhs2')">+🍠📚</span>
-        <span class="ms-del-day" onclick="delMilestoneDay(${day.id})">×</span>
-      </div>
-      <div class="ms-day-body">
-        <div class="ms-col dy">
-          <div class="ms-col-label">🎵🐶</div>
-          ${renderColCells(day,day.id,'dy')}
-        </div>
-        <div class="ms-col xhs1">
-          <div class="ms-col-label">🍠🐶</div>
-          ${renderColCells(day,day.id,'xhs1')}
-        </div>
-        <div class="ms-col xhs2">
-          <div class="ms-col-label">🍠📚</div>
-          ${renderColCells(day,day.id,'xhs2')}
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-function renderColCells(day,dayId,field){
-  const items=day[field]||[];
-  if(items.length===0){
-    return `<div class="ms-cell" onclick="editMilestoneCell(${dayId},'${field}',-1,this)"><div class="ms-cell-text empty">点击记录</div></div>`;
+
+  // 按日期排序（最新在上）
+  D.milestones.sort((a,b)=>{
+    const [am,ad]=a.date.split('-').map(Number);
+    const [bm,bd]=b.date.split('-').map(Number);
+    return bm!==am?bm-am:bd-ad;
+  });
+
+  const hasAnyItems=D.milestones.some(d=>(d.items||[]).length>0);
+  if(!hasAnyItems){
+    el.innerHTML=`<div class="ms-empty-hint">暂无记录<span class="ms-start-btn" onclick="addMsRowByDate()">＋ 开始记录今天</span></div>`;
+    return;
   }
-  return items.map((val,idx)=>{
-    return `<div class="ms-cell" onclick="editMilestoneCell(${dayId},'${field}',${idx},this)">
-      <span class="ms-cell-del" onclick="event.stopPropagation();delMilestoneCell(${dayId},'${field}',${idx})">×</span>
-      <div class="ms-cell-text">${escapeHtml(val)}</div>
+
+  let html=`<div class="ms-table-wrapper">
+    <div class="ms-table-header">
+      <div class="ms-th-acct">账号</div>
+      <div class="ms-th-detail">详情内容</div>
     </div>`;
-  }).join('') + `<div class="ms-cell" onclick="editMilestoneCell(${dayId},'${field}',-1,this)"><div class="ms-cell-text empty">+</div></div>`;
+
+  D.milestones.forEach(day=>{
+    const items=day.items||[];
+    if(items.length===0) return; // 跳过空日期
+    const fullDate=getTodayFullFor(day.date);
+    const wd=getWeekday(day.date);
+    html+=`<div class="ms-date-row" data-mid="${day.id}">
+      <span class="ms-date-label">${fullDate}</span>
+      <span class="ms-date-weekday">${wd}</span>
+      <button class="ms-date-add" onclick="addMsRow(${day.id})">+ 添加</button>
+      <span class="ms-date-del" onclick="delMsDateGroup('${day.date}')" title="删除该日期全部记录">×</span>
+    </div>`;
+    items.forEach(item=>{
+      html+=`<div class="ms-row" data-mid="${day.id}" data-iid="${item.id}">
+        <div class="ms-row-c2">
+          <select class="ms-acct-sel" onchange="changeMsAcct(${day.id},${item.id},this.value)">
+            <option value="dy1" ${item.acct==='dy1'?'selected':''}>🎵🐶 墩墩(抖音)</option>
+            <option value="xhs1" ${item.acct==='xhs1'?'selected':''}>📕🐶 墩墩(红书)</option>
+            <option value="xhs2" ${item.acct==='xhs2'?'selected':''}>📚🐶 小旅嗨(红书)</option>
+          </select>
+        </div>
+        <div class="ms-row-c3">
+          <div class="ms-detail${item.acct?' acct-'+item.acct:''}${item.detail?'':' empty'}" onclick="editMsDetail(${day.id},${item.id},this)">${item.detail?escapeHtml(item.detail):'点击记录'}</div>
+          <span class="ms-row-del" onclick="event.stopPropagation();delMsRow(${day.id},${item.id})">×</span>
+        </div>
+      </div>`;
+    });
+  });
+
+  html+=`</div>`;
+  el.innerHTML=html;
 }
-function updateMilestoneDate(id,date){
-  const d=window.DATA.milestones.find(d=>d.id===id);
-  if(d){d.date=date;save()}
+// dateStr "MM-DD" → "M月D日"
+function getTodayFullFor(dateStr){
+  const [m,d]=dateStr.split('-').map(Number);
+  return `${m}月${d}日`;
 }
-function editMilestoneCell(dayId,field,idx,cell){
+}
+function delMsDateGroup(date){
+  const full=getTodayFullFor(date)+' '+getWeekday(date);
+  if(!confirm(`删除"${full}"的全部记录?`)) return;
+  window.DATA.milestones=window.DATA.milestones.filter(d=>d.date!==date);
+  save();renderMilestone();
+}
+function changeMsAcct(dayId,itemId,newAcct){
   const day=window.DATA.milestones.find(d=>d.id===dayId);
-  if(!day) return;
-  if(!day[field]) day[field]=[];
-  const oldVal=idx>=0?(day[field][idx]||''):'';
-  cell.innerHTML=`<textarea class="ms-cell-edit" autofocus>${escapeHtml(oldVal)}</textarea><button class="ms-confirm-btn" onclick="confirmMilestoneCell(${dayId},'${field}',${idx},this)">确认</button>`;
-  const ta=cell.querySelector('textarea');
-  ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
-  ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();confirmMilestoneCell(dayId,field,idx,cell.querySelector('.ms-confirm-btn'))}};
+  if(!day||!day.items) return;
+  const item=day.items.find(i=>i.id===itemId);
+  if(item){item.acct=newAcct;save();renderMilestone()}
 }
-function confirmMilestoneCell(dayId,field,idx,btn){
-  const cell=btn.parentElement;
-  const ta=cell.querySelector('textarea');
+function editMsDetail(dayId,itemId,cell){
+  const day=window.DATA.milestones.find(d=>d.id===dayId);
+  if(!day||!day.items) return;
+  const item=day.items.find(i=>i.id===itemId);
+  if(!item) return;
+  const oldVal=item.detail||'';
+  cell.outerHTML=`<div class="ms-row-c3">
+    <textarea class="ms-edit-area" autofocus>${escapeHtml(oldVal)}</textarea>
+    <div class="ms-row-confirm">
+      <button class="ms-confirm-btn" onclick="confirmMsDetail(${dayId},${itemId},this)">确认</button>
+      <button class="ms-cancel-btn" onclick="cancelMsEdit(${dayId},${itemId},this)">取消</button>
+    </div>
+  </div>`;
+  const rowEl=cell.closest('.ms-row');
+  const ta=rowEl?rowEl.querySelector('.ms-edit-area'):document.querySelector('.ms-edit-area');
+  if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+    ta.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();confirmMsDetail(dayId,itemId,ta.parentElement.querySelector('.ms-confirm-btn'))}};
+  }
+}
+function confirmMsDetail(dayId,itemId,btn){
+  const rowEl=btn.closest('.ms-row');
+  const ta=rowEl.querySelector('.ms-edit-area');
   const val=ta.value.trim();
   const day=window.DATA.milestones.find(d=>d.id===dayId);
-  if(!day) return;
-  if(!day[field]) day[field]=[];
-  if(idx>=0){
-    // 编辑已有
-    if(val){day[field][idx]=val}else{day[field].splice(idx,1)}
-  }else{
-    // 新增
-    if(val) day[field].push(val);
-  }
+  if(!day||!day.items) return;
+  const item=day.items.find(i=>i.id===itemId);
+  if(item){item.detail=val}
   save();renderMilestone();
 }
-function delMilestoneCell(dayId,field,idx){
-  const day=window.DATA.milestones.find(d=>d.id===dayId);
-  if(!day||!day[field]) return;
-  day[field].splice(idx,1);
+function cancelMsEdit(dayId,itemId,btn){
   save();renderMilestone();
 }
-function addMilestoneCell(dayId,field){
+function addMsRow(dayId){
   const day=window.DATA.milestones.find(d=>d.id===dayId);
   if(!day) return;
-  if(!day[field]) day[field]=[];
-  // 触发编辑新格
-  renderMilestone();
+  if(!day.items) day.items=[];
+  day.items.push({id:Date.now(),acct:'dy1',detail:''});
+  save();renderMilestone();
+  // 自动触发新行的编辑
   setTimeout(()=>{
-    const dayEl=document.querySelector(`.ms-day[data-mid="${dayId}"]`);
-    if(!dayEl) return;
-    const col=dayEl.querySelector(`.ms-col.${field}`);
-    if(!col) return;
-    const cells=col.querySelectorAll('.ms-cell');
-    const lastCell=cells[cells.length-1]; // 最后一个是"+"空格
-    if(lastCell) lastCell.click();
+    const rows=document.querySelectorAll('.ms-row[data-mid="'+dayId+'"]');
+    const lastRow=rows[rows.length-1];
+    if(!lastRow) return;
+    const detailEl=lastRow.querySelector('.ms-detail');
+    if(detailEl) detailEl.click();
   },50);
 }
-function addMilestoneDate(){
-  const d={id:Date.now(),date:getTodayMD(),dy:[],xhs1:[],xhs2:[]};
-  window.DATA.milestones.push(d);
-  save();renderMilestone();
+function addMsRowByDate(date){
+  // 默认今天，如果没传就用今天
+  const d=date||getTodayMD();
+  let day=window.DATA.milestones.find(day=>day.date===d);
+  if(!day){
+    day={id:Date.now(),date:d,items:[]};
+    window.DATA.milestones.push(day);
+  }
+  addMsRow(day.id);
 }
-function delMilestoneDay(id){
-  if(!confirm('删除这一天的记录?')) return;
-  window.DATA.milestones=window.DATA.milestones.filter(d=>d.id!==id);
+function delMsRow(dayId,itemId){
+  const day=window.DATA.milestones.find(d=>d.id===dayId);
+  if(!day||!day.items) return;
+  day.items=day.items.filter(i=>i.id!==itemId);
   save();renderMilestone();
 }
 
