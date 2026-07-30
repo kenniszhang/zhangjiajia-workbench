@@ -785,10 +785,30 @@ function defaultData(){
 function pad(n){return n<10?'0'+n:n}
 function load(){
   try{
-    const s=localStorage.getItem(STORAGE_KEY);
+    // 优先读 v6，没有则从 v5 迁移
+    let s=localStorage.getItem(STORAGE_KEY);
+    if(!s){
+      s=localStorage.getItem('mtb_data_v5');
+      if(s){
+        const old=JSON.parse(s);
+        // 迁移 v5 → v6
+        if(old.milestones&&old.milestones.length>0){
+          old.milestones=old.milestones.map(day=>{
+            const items=[];
+            (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
+            (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
+            (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
+            return {id:day.id,date:day.date,items};
+          });
+        }
+        const d=old;
+        save(d);
+        return d;
+      }
+    }
     if(s){
       const d=JSON.parse(s);
-      // 数据迁移：v5 milestones [{id,date,dy:[],xhs1:[],xhs2:[]}] → v6 [{id,date,items:[{id,acct,detail}]}]
+      // 兼容：万一 v6 里还有旧格式的 milestones
       if(d.milestones&&d.milestones.length>0&&d.milestones[0].items===undefined){
         d.milestones=d.milestones.map(day=>{
           const items=[];
