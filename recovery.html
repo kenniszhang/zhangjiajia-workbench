@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据诊断</title>
+<style>
+  body{background:#0f1419;color:#e8eef5;font-family:-apple-system,sans-serif;padding:16px;font-size:14px}
+  h2{color:#ff2442;margin-top:24px}
+  .key{color:#25f4ee;word-break:break-all}
+  .val{background:#1a2028;padding:8px;border-radius:8px;margin:8px 0;max-height:200px;overflow:auto;font-size:11px;white-space:pre-wrap;word-break:break-all}
+  .good{color:#22c55e}
+  .bad{color:#f87171}
+  button{background:#ff2442;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:14px;cursor:pointer;margin:4px}
+  .btn-sm{background:#3b82f6;font-size:12px;padding:4px 10px}
+</style>
+</head>
+<body>
+<h1>🔍 localStorage 诊断</h1>
+<p>域名: <span id="host"></span></p>
+<button onclick="scan()">扫描所有 key</button>
+<button class="btn-sm" onclick="copyAll()">复制全部结果</button>
+<div id="results"></div>
+
+<script>
+document.getElementById('host').textContent=location.hostname;
+
+function scan(){
+  const results=document.getElementById('results');
+  let html='<h2>所有 localStorage Keys:</h2>';
+  const found=[];
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    found.push(key);
+    const val=localStorage.getItem(key);
+    let preview=val;
+    if(val.length>500) preview=val.substring(0,500)+'...';
+    try{
+      const obj=JSON.parse(val);
+      if(obj.contents) html+=`<div class="good">✅ <span class="key">${key}</span> — 包含 contents (${obj.contents.length}条)</div>`;
+      else if(obj.tasks) html+=`<div class="good">✅ <span class="key">${key}</span> — 包含 tasks (${obj.tasks.length}条)</div>`;
+      else html+=`<div>⚠️ <span class="key">${key}</span> — JSON但无contents/tasks</div>`;
+    }catch(e){
+      html+=`<div><span class="key">${key}</span> — 非JSON, 长度${val.length}</div>`;
+    }
+    html+=`<div class="val">${escapeHtml(preview)}</div>`;
+  }
+  if(found.length===0) html+='<div class="bad">❌ localStorage 完全为空!</div>';
+  html+=`<h2>总计: ${found.length} 个 key</h2>`;
+  html+=`<h2>localStorage 使用量: ${(JSON.stringify(localStorage).length/1024).toFixed(1)} KB</h2>`;
+  results.innerHTML=html;
+}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function copyAll(){
+  let text='';
+  for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    text+=`=== ${key} ===\n${localStorage.getItem(key)}\n\n`;
+  }
+  navigator.clipboard.writeText(text).then(()=>alert('已复制到剪贴板!'));
+}
+
+scan();
+</script>
+</body>
+</html>
