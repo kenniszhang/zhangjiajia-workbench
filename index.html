@@ -692,6 +692,8 @@ body{min-height:100vh;padding-bottom:80px}
 
 <script>
 /* ============ 数据层 ============ */
+// ⚠️ STORAGE_KEY 永久固定为 mtb_data_v5，永远不要改！
+// 改 KEY 会导致用户数据丢失（新旧 key 不互通，默认数据会覆盖）
 const STORAGE_KEY='mtb_data_v5';
 const ACCOUNTS={
   xhs1:{name:'墩墩比熊妹',platform:'xhs',platformName:'小红书',track:'宠物赛道',emoji:'📕'},
@@ -785,25 +787,29 @@ function defaultData(){
 function pad(n){return n<10?'0'+n:n}
 function load(){
   try{
-    // 按优先级读取：v5 → v4
-    for(const key of [STORAGE_KEY,'mtb_data_v4']){
-      const s=localStorage.getItem(key);
-      if(s){
-        const d=JSON.parse(s);
-        // 兼容旧 milestones 格式 {dy:[],xhs1:[],xhs2:[]} → {items:[{acct,detail}]}
-        if(d.milestones&&d.milestones.length>0&&d.milestones[0].items===undefined){
-          d.milestones=d.milestones.map(day=>{
-            const items=[];
-            (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
-            (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
-            (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
-            return {id:day.id,date:day.date,items};
-          });
-        }
-        return d;
+    const s=localStorage.getItem(STORAGE_KEY);
+    if(s){
+      const d=JSON.parse(s);
+      // 兼容旧 milestones 格式 {dy:[],xhs1:[],xhs2:[]} → {items:[{acct,detail}]}
+      if(d.milestones&&d.milestones.length>0&&d.milestones[0].items===undefined){
+        d.milestones=d.milestones.map(day=>{
+          const items=[];
+          (day.dy||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'dy1',detail:t}));
+          (day.xhs1||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs1',detail:t}));
+          (day.xhs2||[]).forEach(t=>items.push({id:Date.now()+Math.random()*1e6|0,acct:'xhs2',detail:t}));
+          return {id:day.id,date:day.date,items};
+        });
+        save(d);
       }
+      return d;
     }
-  }catch(e){}
+    // 首次使用：初始化默认数据
+    const d=defaultData();
+    save(d);
+    return d;
+  }catch(e){
+    console.error('数据加载失败:',e);
+  }
   const d=defaultData();
   save(d);
   return d;
