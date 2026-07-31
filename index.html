@@ -1520,25 +1520,30 @@ function confirmDelContent(id){
   const c=window.DATA.contents.find(c=>c.id===id);
   if(!c) return;
   const title=c.title||'(无标题)';
-  showConfirm(`确认删除「${title}」？`,()=>{
+  showConfirm(`确认删除「${title}」？`,function(){
     window.DATA.contents=window.DATA.contents.filter(c=>c.id!==id);
     if(window.DATA.reviews&&window.DATA.reviews[id]) delete window.DATA.reviews[id];
     save();renderContentTabs();renderContentList();renderOverview();renderPlan();
   });
 }
+let _confirmCallback=null;
 function showConfirm(msg,onOk){
+  _confirmCallback=onOk;
   const overlay=document.createElement('div');
   overlay.className='confirm-overlay';
   overlay.innerHTML=`<div class="confirm-box">
     <div class="confirm-msg">${msg}</div>
     <div class="confirm-btns">
-      <button class="btn-cancel" onclick="this.closest('.confirm-overlay').remove()">取消</button>
-      <button class="btn-danger" onclick="this.closest('.confirm-overlay').remove();(${onOk.toString()})()">是</button>
+      <button class="btn-cancel">取消</button>
+      <button class="btn-danger">是</button>
     </div>
   </div>`;
+  overlay.querySelector('.btn-cancel').onclick=()=>overlay.remove();
+  overlay.querySelector('.btn-danger').onclick=()=>{overlay.remove();if(_confirmCallback)_confirmCallback()};
   overlay.onclick=function(e){if(e.target===overlay) overlay.remove()};
   document.body.appendChild(overlay);
 }
+function toggleBody(el){
   const card=el.closest('.content-item');
   if(card) card.classList.toggle('expanded');
   el.textContent=card&&card.classList.contains('expanded')?'收起正文 ▴':'展开正文 ▾';
