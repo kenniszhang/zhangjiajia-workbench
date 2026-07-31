@@ -250,7 +250,10 @@ body{min-height:100vh;padding-bottom:80px}
 .tab .cnt{font-size:11px;opacity:.7;margin-left:4px}
 
 .content-list{display:flex;flex-direction:column;gap:10px}
-.content-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;transition:.2s}
+.ci-swipe-wrap{position:relative;overflow:hidden;border-radius:var(--radius)}
+.ci-swipe-bg{position:absolute;right:0;top:0;bottom:0;width:72px;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border-radius:0 var(--radius) var(--radius) 0;user-select:none;-webkit-user-select:none}
+.ci-swipe-bg:active{background:#dc2626}
+.content-item{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;transition:transform .2s;position:relative;z-index:1}
 .content-item:active{transform:scale(.99)}
 .content-item .ci-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
 .content-item .ci-title{font-size:15px;font-weight:600;flex:1;line-height:1.4}
@@ -267,11 +270,16 @@ body{min-height:100vh;padding-bottom:80px}
 .content-item .ci-body{font-size:13px;color:var(--text-muted);line-height:1.6;padding:10px;background:var(--bg);border-radius:8px;margin-top:6px;white-space:pre-wrap;display:none}
 .content-item.expanded .ci-body{display:block}
 .content-item .ci-toggle{font-size:12px;color:var(--primary);cursor:pointer;margin-top:6px;display:inline-block}
-.content-item .ci-del-hint{position:absolute;top:8px;right:10px;font-size:11px;color:var(--warning);opacity:0;transition:.2s;background:rgba(251,191,36,.12);padding:2px 8px;border-radius:8px;pointer-events:none}
-.content-item.press .ci-del-hint{opacity:1}
-.content-item.press{border-color:var(--warning);background:rgba(251,191,36,.05)}
-.content-item{position:relative}
 
+/* ========== 确认删除弹窗 ========== */
+.confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeIn .2s}
+.confirm-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;max-width:300px;width:90%;text-align:center}
+.confirm-box .confirm-msg{font-size:14px;color:var(--text);margin-bottom:16px;line-height:1.5}
+.confirm-box .confirm-btns{display:flex;gap:10px;justify-content:center}
+.confirm-box .confirm-btns button{padding:8px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit}
+.confirm-box .btn-cancel{background:var(--bg-card-2);color:var(--text-muted);border:1px solid var(--border)!important}
+.confirm-box .btn-danger{background:#ef4444;color:#fff}
+.confirm-box .btn-danger:active{background:#dc2626}
 /* ========== 数据复盘(三列表格) ========== */
 .review-day{margin-bottom:18px}
 .review-day-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px}
@@ -1439,44 +1447,98 @@ function renderContentList(){
   }
   el.innerHTML=list.map(c=>{
     const a=ACCOUNTS[c.acct];
-    return `<div class="content-item" data-cid="${c.id}" onclick="editContent(${c.id})" ontouchstart="longPressStart(${c.id},this)" ontouchend="longPressEnd(this)" ontouchmove="longPressEnd(this)" onmousedown="longPressStart(${c.id},this)" onmouseup="longPressEnd(this)" onmouseleave="longPressEnd(this)">
-      <div class="ci-del-hint">松开删除</div>
-      <div class="ci-head">
-        <div class="ci-title">${c.title||'(无标题)'}</div>
-        <div class="ci-status ${c.status}">${STATUS_MAP[c.status]}</div>
+    return `<div class="ci-swipe-wrap" data-cid="${c.id}">
+      <div class="ci-swipe-bg" onclick="event.stopPropagation();confirmDelContent(${c.id})">🗑️</div>
+      <div class="content-item" data-cid="${c.id}" onclick="editContent(${c.id})" ontouchstart="swipeStart(event,this)" ontouchmove="swipeMove(event,this)" ontouchend="swipeEnd(event,this)">
+        <div class="ci-head">
+          <div class="ci-title">${c.title||'(无标题)'}</div>
+          <div class="ci-status ${c.status}">${STATUS_MAP[c.status]}</div>
+        </div>
+        <div class="ci-meta">
+          <span class="pill ${a.platform} ${c.acct==='xhs2'?'xhs2':''}">${a.platformName}·${a.name}</span>
+          <span class="pill">${c.category}</span>
+          ${c.time?`<span>📅 ${c.time.slice(5,16).replace('T',' ')}</span>`:''}
+        </div>
+        ${c.content?`<div class="ci-body">${c.content}</div><span class="ci-toggle" onclick="event.stopPropagation();toggleBody(this)">展开正文 ▾</span>`:''}
       </div>
-      <div class="ci-meta">
-        <span class="pill ${a.platform} ${c.acct==='xhs2'?'xhs2':''}">${a.platformName}·${a.name}</span>
-        <span class="pill">${c.category}</span>
-        ${c.time?`<span>📅 ${c.time.slice(5,16).replace('T',' ')}</span>`:''}
-      </div>
-      ${c.content?`<div class="ci-body">${c.content}</div><span class="ci-toggle" onclick="event.stopPropagation();toggleBody(this)">展开正文 ▾</span>`:''}
     </div>`;
   }).join('');
+  // 绑定全局点击关闭所有已滑开的卡片
+  bindSwipeClose();
 }
-/* 长按删除 */
-let _pressTimer=null,_pressFired=false;
-function longPressStart(id,el){
-  _pressFired=false;
-  el.classList.add('press');
-  _pressTimer=setTimeout(()=>{
-    _pressFired=true;
-    if(confirm('删除这条内容?\n「'+(window.DATA.contents.find(c=>c.id===id)||{}).title+'」')){
-      window.DATA.contents=window.DATA.contents.filter(c=>c.id!==id);
-      if(window.DATA.reviews && window.DATA.reviews[id]) delete window.DATA.reviews[id];
-      save();renderContentTabs();renderContentList();renderOverview();
+
+/* ============ 左滑删除 ============ */
+let _swipeState={el:null,startX:0,startY:0,openEl:null};
+function swipeStart(e,el){
+  _swipeState.el=el;
+  _swipeState.startX=e.touches?e.touches[0].clientX:e.clientX;
+  _swipeState.startY=e.touches?e.touches[0].clientY:e.clientY;
+  el.style.transition='none';
+}
+function swipeMove(e,el){
+  if(_swipeState.el!==el) return;
+  const x=e.touches?e.touches[0].clientX:e.clientX;
+  const y=e.touches?e.touches[0].clientY:e.clientY;
+  const dx=x-_swipeState.startX;
+  const dy=Math.abs(y-_swipeState.startY);
+  // 水平滑动超过垂直才触发(防上下滚动误触)
+  if(Math.abs(dx)>10&&Math.abs(dx)>dy*1.5){
+    if(e.cancelable) e.preventDefault();
+  }
+  // 只允许左滑
+  if(dx<0){
+    el.style.transform=`translateX(${Math.max(dx,-72)}px)`;
+  }else{
+    el.style.transform='translateX(0)';
+  }
+}
+function swipeEnd(e,el){
+  _swipeState.el=null;
+  el.style.transition='transform .25s';
+  const dx=parseFloat(el.style.transform.replace('translateX(','').replace('px)',''))||0;
+  if(dx<-36){
+    el.style.transform='translateX(-72px)';
+    // 关闭之前打开的
+    if(_swipeState.openEl&&_swipeState.openEl!==el){
+      _swipeState.openEl.style.transform='translateX(0)';
     }
-  },650);
+    _swipeState.openEl=el;
+  }else{
+    el.style.transform='translateX(0)';
+  }
 }
-function longPressEnd(el){
-  el.classList.remove('press');
-  if(_pressTimer){clearTimeout(_pressTimer);_pressTimer=null}
+function bindSwipeClose(){
+  // 点击卡片外部区域关闭所有滑开
+  document.addEventListener('click',function closeHandler(e){
+    if(_swipeState.openEl&&!e.target.closest('.ci-swipe-wrap')){
+      _swipeState.openEl.style.transform='translateX(0)';
+      _swipeState.openEl=null;
+    }
+  },{once:true});
 }
-// 屏蔽长按后的点击(避免删除后还弹编辑窗)
-document.addEventListener('click',e=>{
-  if(_pressFired){e.preventDefault();e.stopPropagation();_pressFired=false}
-},true);
-function toggleBody(el){
+function confirmDelContent(id){
+  const c=window.DATA.contents.find(c=>c.id===id);
+  if(!c) return;
+  const title=c.title||'(无标题)';
+  showConfirm(`确认删除「${title}」？`,()=>{
+    window.DATA.contents=window.DATA.contents.filter(c=>c.id!==id);
+    if(window.DATA.reviews&&window.DATA.reviews[id]) delete window.DATA.reviews[id];
+    save();renderContentTabs();renderContentList();renderOverview();renderPlan();
+  });
+}
+function showConfirm(msg,onOk){
+  const overlay=document.createElement('div');
+  overlay.className='confirm-overlay';
+  overlay.innerHTML=`<div class="confirm-box">
+    <div class="confirm-msg">${msg}</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="this.closest('.confirm-overlay').remove()">取消</button>
+      <button class="btn-danger" onclick="this.closest('.confirm-overlay').remove();(${onOk.toString()})()">是</button>
+    </div>
+  </div>`;
+  overlay.onclick=function(e){if(e.target===overlay) overlay.remove()};
+  document.body.appendChild(overlay);
+}
   const card=el.closest('.content-item');
   if(card) card.classList.toggle('expanded');
   el.textContent=card&&card.classList.contains('expanded')?'收起正文 ▴':'展开正文 ▾';
