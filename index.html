@@ -65,25 +65,25 @@ body{min-height:100vh;padding-bottom:80px}
 .section-title .right{font-size:13px;color:var(--text-muted);font-weight:400}
 
 .acct-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:8px}
-.acct-tabs{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;margin-bottom:8px;padding-bottom:2px}
-.acct-tabs::-webkit-scrollbar{display:none}
-.acct-tabs .acct-card{min-width:200px;flex-shrink:0;padding:12px}
-.acct-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:.2s}
-.acct-card:active{transform:scale(.98)}
+.acct-tabs{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+.acct-tabs .acct-card{width:100%;padding:14px 16px}
+.acct-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.acct-card:active{transform:scale(.99)}
 .acct-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
 .acct-card.xhs::before{background:#ff2442}
 .acct-card.xhs2::before{background:#a855f7}
 .acct-card.dy::before{background:#000;background:linear-gradient(90deg,#25f4ee,#fe2c55)}
-.acct-card .top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.acct-card .top{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
 .acct-card .avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
 .acct-card.xhs .avatar{background:#ff2442;color:#fff}
 .acct-card.xhs2 .avatar{background:#a855f7;color:#fff}
 .acct-card.dy .avatar{background:#000;color:#fff}
 .acct-card .name{font-weight:600;font-size:15px}
 .acct-card .tag{font-size:11px;color:var(--text-muted);margin-top:2px;display:inline-block;background:var(--bg-card-2);padding:2px 8px;border-radius:10px}
-.acct-card .stats{display:flex;gap:14px;font-size:12px;color:var(--text-muted)}
-.acct-card .stats b{color:var(--text);font-size:16px;display:block;margin-bottom:2px;font-weight:700}
-.platform-badge{position:absolute;top:10px;right:10px;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600}
+.acct-card .stats{text-align:right;flex-shrink:0}
+.acct-card .stats b{color:var(--text);font-size:22px;display:block;font-weight:700;line-height:1.2}
+.acct-card .stats .stats-label{font-size:11px;color:var(--text-muted)}
+.platform-badge{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;display:inline-block;margin-bottom:4px}
 .platform-badge.xhs{background:var(--primary-soft);color:#ff6b80}
 .platform-badge.xhs2{background:rgba(168,85,247,.15);color:#c084fc}
 .platform-badge.dy{background:rgba(37,244,238,.15);color:#25f4ee}
@@ -417,7 +417,7 @@ body{min-height:100vh;padding-bottom:80px}
 <!-- 顶部导航(桌面) -->
 <div class="nav-tabs" id="navTabs">
   <div class="nav-tab active" data-view="dashboard">📊 工作台</div>
-  <div class="nav-tab" data-view="content">📝 内容发布</div>
+  <div class="nav-tab" data-view="content">📝 内容列表</div>
   <div class="nav-tab" data-view="review">📈 数据复盘</div>
   <div class="nav-tab" data-view="hot">🔥 爆款情报</div>
 </div>
@@ -426,10 +426,12 @@ body{min-height:100vh;padding-bottom:80px}
 
   <!-- ============ 视图1: 工作台 ============ -->
   <div class="view active" id="view-dashboard">
-    <!-- 概览:今日任务 + 账号标签 -->
+    <!-- 账号概览 -->
     <div class="section-title"><span class="left">账号概览</span><span class="right">3个账号 · 2个平台</span></div>
-    <div class="overview" id="overviewStats"></div>
     <div class="acct-tabs" id="acctGrid"></div>
+    <div style="margin-top:12px;text-align:center">
+      <a class="btn small primary" onclick="openContentModal()">＋ 快速添加内容</a>
+    </div>
 
     <!-- 日常&里程碑记录 -->
     <div class="section-title" style="margin-top:24px">
@@ -461,10 +463,13 @@ body{min-height:100vh;padding-bottom:80px}
       <span class="right"><a class="btn small" onclick="openPrepModal()">＋ 新建筹备</a></span>
     </div>
     <div id="prepList"></div>
+  </div>
 
-    <!-- 本月计划 -->
-    <div class="section-title" style="margin-top:24px">
-      <span class="left" style="gap:0">本月发布计划</span>
+  <!-- ============ 视图2: 发布月历 + 内容列表 ============ -->
+  <div class="view" id="view-content">
+    <!-- 发布月历 -->
+    <div class="section-title">
+      <span class="left" style="gap:0">发布月历</span>
       <span class="right" style="display:flex;align-items:center;gap:8px">
         <a class="btn small" onclick="changePlanMonth(-1)">◀</a>
         <span id="planMonthLabel" style="font-size:13px;font-weight:600;min-width:70px;text-align:center">2026年7月</span>
@@ -472,11 +477,9 @@ body{min-height:100vh;padding-bottom:80px}
       </span>
     </div>
     <div id="planCalendar"></div>
-  </div>
 
-  <!-- ============ 视图2: 内容发布 ============ -->
-  <div class="view" id="view-content">
-    <div class="section-title"><span class="left">内容发布管理</span><span class="right"><a class="btn small primary" onclick="openContentModal()">＋ 新建内容</a></span></div>
+    <!-- 内容列表 -->
+    <div class="section-title" style="margin-top:24px"><span class="left">内容列表</span></div>
     <div class="tabs" id="contentTabs"></div>
     <div class="content-list" id="contentList"></div>
   </div>
@@ -509,7 +512,7 @@ body{min-height:100vh;padding-bottom:80px}
 <div class="bottom-nav">
   <div class="bottom-nav-inner">
     <div class="bn-item active" data-view="dashboard"><span class="ic">📊</span><span class="lb">工作台</span></div>
-    <div class="bn-item" data-view="content"><span class="ic">📝</span><span class="lb">发布</span></div>
+    <div class="bn-item" data-view="content"><span class="ic">📝</span><span class="lb">发布月历</span></div>
     <div class="bn-item" data-view="review"><span class="ic">📈</span><span class="lb">复盘</span></div>
     <div class="bn-item" data-view="hot"><span class="ic">🔥</span><span class="lb">情报</span></div>
   </div>
@@ -849,31 +852,22 @@ function initDate(){
 function renderOverview(){
   const D=window.DATA;
   if(!D.stats) D.stats={contentTotal:0,published:0,totalFans:0,hotContent:0,scheduled:0};
-  const s=D.stats;
-  const taskDone=D.tasks.filter(t=>t.done).length;
-  const taskTotal=D.tasks.length;
-  const taskPct=taskTotal>0?Math.round(taskDone/taskTotal*100):0;
-
-  document.getElementById('overviewStats').innerHTML=`
-    <div class="stat-box primary"><div class="label">今日任务</div><div class="value">${taskDone}/${taskTotal}</div><div class="sub">完成${taskPct}%</div></div>
-  `;
 
   document.getElementById('acctGrid').innerHTML=Object.entries(ACCOUNTS).map(([k,a])=>{
     const list=D.contents.filter(c=>c.acct===k);
     const pub=list.filter(c=>c.status==='published').length;
     return `<div class="acct-card ${a.platform} ${k==='xhs2'?'xhs2':''}" onclick="filterContent('${k}')">
-      <span class="platform-badge ${a.platform} ${k==='xhs2'?'xhs2':''}">${a.platformName}</span>
       <div class="top">
         <div class="avatar">${a.emoji}</div>
         <div>
+          <span class="platform-badge ${a.platform} ${k==='xhs2'?'xhs2':''}">${a.platformName}</span>
           <div class="name">${a.name}</div>
           <span class="tag">${a.track}</span>
         </div>
       </div>
       <div class="stats">
-        <div><b>${list.length}</b>内容</div>
-        <div><b>${pub}</b>已发</div>
-        <div><b>—</b>待发布</div>
+        <b>${pub}</b>
+        <span class="stats-label">已发布内容</span>
       </div>
     </div>`;
   }).join('');
@@ -903,9 +897,6 @@ function renderTasks(){
   const pct=total>0?Math.round(done/total*100):0;
   document.getElementById('taskProgress').style.width=pct+'%';
   document.getElementById('taskProgressText').textContent=`${done}/${total}`;
-  // 也更新今日任务概览数字
-  document.querySelector('#overviewStats .stat-box.primary .value').textContent=`${done}/${total}`;
-  document.querySelector('#overviewStats .stat-box.primary .sub').textContent=`完成${pct}%`;
 
   // 如果有历史任务,显示按钮
   const histCount=D.tasks.filter(t=>t.date!==todayStr).length;
