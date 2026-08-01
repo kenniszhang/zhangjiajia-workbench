@@ -306,6 +306,9 @@ body{min-height:100vh;padding-bottom:80px}
 .review-table .rc-detail-input:focus{color:var(--text)}
 .review-table .rc-detail-input::placeholder{color:var(--text-dim)}
 .review-empty-row td{text-align:center;color:var(--text-dim);font-size:12px;padding:16px}
+.rc-hidden{display:none}
+.rc-toggle-btn{font-size:12px;color:var(--text-dim);cursor:pointer;margin-left:auto;padding:2px 8px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);white-space:nowrap;user-select:none;-webkit-user-select:none;transition:.15s}
+.rc-toggle-btn:active{background:var(--bg-hover);color:var(--text)}
 @media(max-width:768px){
   .review-table th{font-size:10px;padding:6px 4px}
   .review-table td{font-size:11px;padding:6px 4px}
@@ -1620,12 +1623,16 @@ function renderReview(){
     const items=groups[dateKey];
     const isToday=dateKey===todayKey;
     const dateLabel=isToday?`${dateKey} · 今日`:dateKey;
+    const uniqKey=dateKey.replace(/[^a-zA-Z0-9]/g,'_');
+    let hasUnset=false;
     let rows=items.map(c=>{
       const rv=D.reviews[c.id]||{};
       const st=rv.status||'';
       const detail=rv.detail||'';
       const rowClass=st?`status-${st}`:'';
-      return `<tr class="${rowClass}" data-cid="${c.id}">
+      const hidden=!st?' rc-hidden':'';
+      if(!st) hasUnset=true;
+      return `<tr class="${rowClass}${hidden}" data-cid="${c.id}">
         <td class="rc-title-cell">${c.title||'(无标题)'}</td>
         <td>
           <select class="rc-status-select" onchange="updateReviewStatus(${c.id},this.value)">
@@ -1640,9 +1647,11 @@ function renderReview(){
     }).join('');
     if(items.length===0){
       rows=`<tr class="review-empty-row"><td colspan="3">今日暂无已发布内容,发布后会自动同步到这里</td></tr>`;
+      hasUnset=false;
     }
-    return `<div class="review-day${isToday?' today':''}">
-      <div class="review-day-title${isToday?' today':''}"><span class="date-badge">${dateLabel}</span></div>
+    const toggleBtn=hasUnset?`<span class="rc-toggle-btn" onclick="toggleReviewHidden(this,'${uniqKey}')">🔽 展开</span>`:'';
+    return `<div class="review-day${isToday?' today':''}" id="review-${uniqKey}">
+      <div class="review-day-title${isToday?' today':''}"><span class="date-badge">${dateLabel}</span>${toggleBtn}</div>
       <table class="review-table">
         <thead><tr>
           <th class="col-title">标题</th>
@@ -1653,6 +1662,19 @@ function renderReview(){
       </table>
     </div>`;
   }).join('');
+}
+function toggleReviewHidden(btn,uniqKey){
+  const dayEl=document.getElementById('review-'+uniqKey);
+  if(!dayEl) return;
+  const hiddens=dayEl.querySelectorAll('.rc-hidden');
+  const isExpanded=btn.textContent.includes('收起');
+  if(isExpanded){
+    hiddens.forEach(r=>r.style.display='none');
+    btn.textContent='🔽 展开';
+  }else{
+    hiddens.forEach(r=>r.style.display='');
+    btn.textContent='🔼 收起';
+  }
 }
 function updateReviewStatus(cid,status){
   if(!window.DATA.reviews) window.DATA.reviews={};
