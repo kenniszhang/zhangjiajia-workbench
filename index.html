@@ -307,6 +307,7 @@ body{min-height:100vh;padding-bottom:80px}
 .review-table .rc-detail-input::placeholder{color:var(--text-dim)}
 .review-empty-row td{text-align:center;color:var(--text-dim);font-size:12px;padding:16px}
 .rc-hidden{display:none}
+.rc-hidden.rc-show{display:table-row}
 .rc-toggle-btn{font-size:12px;color:var(--text-dim);cursor:pointer;margin-left:auto;padding:2px 8px;border-radius:8px;background:var(--bg-card);border:1px solid var(--border);white-space:nowrap;user-select:none;-webkit-user-select:none;transition:.15s}
 .rc-toggle-btn:active{background:var(--bg-hover);color:var(--text)}
 @media(max-width:768px){
@@ -1669,10 +1670,10 @@ function toggleReviewHidden(btn,uniqKey){
   const hiddens=dayEl.querySelectorAll('.rc-hidden');
   const isExpanded=btn.textContent.includes('收起');
   if(isExpanded){
-    hiddens.forEach(r=>r.style.display='none');
+    hiddens.forEach(r=>r.classList.remove('rc-show'));
     btn.textContent='🔽 展开';
   }else{
-    hiddens.forEach(r=>r.style.display='');
+    hiddens.forEach(r=>r.classList.add('rc-show'));
     btn.textContent='🔼 收起';
   }
 }
