@@ -233,6 +233,9 @@ body{min-height:100vh;padding-bottom:80px}
 .ms-row-del:active{opacity:1}
 .ms-empty-hint{text-align:center;padding:24px;color:var(--text-dim);font-size:13px}
 .ms-empty-hint .ms-start-btn{display:inline-block;margin-top:8px;font-size:12px;color:var(--primary);cursor:pointer;padding:4px 16px;background:var(--primary-soft);border-radius:8px;font-weight:600}
+.ms-bottom-add{text-align:center;padding:8px}
+.ms-bottom-add-btn{font-size:11px;color:var(--text-muted);cursor:pointer;padding:4px 16px;background:var(--bg-card-2);border-radius:8px;border:1px solid var(--border);font-family:inherit;font-weight:500;transition:.15s}
+.ms-bottom-add-btn:active{background:var(--bg-hover);color:var(--text)}
 @media(max-width:768px){
   .ms-th-acct{width:90px;min-width:90px}
   .ms-row-c2{width:90px;min-width:90px}
@@ -1343,7 +1346,8 @@ function renderMilestone(){
     });
   });
 
-  html+=`</div>`;
+  html+=`</div>
+    <div class="ms-bottom-add"><button class="ms-bottom-add-btn" onclick="addMsRowAtBottom()">+ 添加行</button></div>`;
   el.innerHTML=html;
 }
 // 编辑日期：输入"x月x日"或"MM-DD"，更新该日期下所有记录
@@ -1435,11 +1439,21 @@ function addMsRow(dayId){
   },50);
 }
 function addMsRowByDate(){
-  // 找日期最早的那一天（表格最底部），没有则创建今天
+  // 标题栏按钮：添加到今天
+  const today=getTodayMD();
+  let day=window.DATA.milestones.find(d=>d.date===today);
+  if(!day){
+    day={id:Date.now(),date:today,items:[]};
+    window.DATA.milestones.push(day);
+  }
+  addMsRow(day.id);
+}
+// 底部按钮：添加到最底部日期的前一天
+function addMsRowAtBottom(){
+  // 找有内容的日期中最早的那天
   let earliest=null;
   window.DATA.milestones.forEach(d=>{
-    if(!d.items) d.items=[];
-    if(d.items.length>0||d.date){
+    if(d.items&&d.items.length>0){
       if(!earliest) earliest=d;
       else{
         const [am,ad]=String(d.date).split('-').map(Number);
@@ -1449,10 +1463,22 @@ function addMsRowByDate(){
     }
   });
   if(!earliest){
-    earliest={id:Date.now(),date:getTodayMD(),items:[]};
-    window.DATA.milestones.push(earliest);
+    // 没有任何记录，直接添加今天
+    addMsRowByDate();
+    return;
   }
-  addMsRow(earliest.id);
+  // 计算前一天日期
+  const [m,d]=String(earliest.date).split('-').map(Number);
+  const now=new Date();
+  const prevDate=new Date(now.getFullYear(),m-1,d-1);
+  const prevStr=`${prevDate.getMonth()+1}-${pad(prevDate.getDate())}`;
+  // 创建前一天的日期块
+  let day=window.DATA.milestones.find(day=>day.date===prevStr);
+  if(!day){
+    day={id:Date.now(),date:prevStr,items:[]};
+    window.DATA.milestones.push(day);
+  }
+  addMsRow(day.id);
 }
 function delMsRow(dayId,itemId){
   const day=window.DATA.milestones.find(d=>d.id===dayId);
