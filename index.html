@@ -204,8 +204,9 @@ body{min-height:100vh;padding-bottom:80px}
 /* 日期行（合并整行） */
 .ms-date-row{display:flex;align-items:center;padding:8px 12px;background:var(--bg-card-2);border-bottom:1px solid var(--border);gap:8px}
 .ms-date-label{font-size:13px;font-weight:700;color:var(--text)}
-.ms-date-input{font-size:12px;font-weight:700;color:var(--text);background:transparent;border:none;outline:none;font-family:inherit;width:100px}
-.ms-date-input:focus{color:var(--primary)}
+.ms-date-input{font-size:13px;font-weight:700;color:var(--text);background:transparent;border:1px solid transparent;outline:none;font-family:inherit;width:90px;padding:2px 4px;border-radius:4px;transition:.15s}
+.ms-date-input:hover{border-color:var(--border)}
+.ms-date-input:focus{color:var(--primary);border-color:var(--primary);background:var(--bg)}
 .ms-date-weekday{font-size:11px;color:var(--text-dim);margin-left:2px}
 .ms-date-del{font-size:12px;color:var(--text-dim);cursor:pointer;margin-left:auto;opacity:0;transition:.15s;padding:2px 6px}
 .ms-date-row:hover .ms-date-del{opacity:.7}
@@ -1313,7 +1314,7 @@ function renderMilestone(){
     const fullDate=getTodayFullFor(day.date);
     const wd=getWeekday(day.date);
     html+=`<div class="ms-date-row" data-mid="${day.id}">
-      <span class="ms-date-label">${fullDate}</span>
+      <input type="text" class="ms-date-input" value="${fullDate}" data-old-date="${day.date.replace(/"/g,'&quot;')}" onchange="changeMsDate(this,'${day.date.replace(/'/g,"\\'")}')">
       <span class="ms-date-weekday">${wd}</span>
       <button class="ms-date-add" onclick="addMsRow(${day.id})">+ 添加</button>
       <span class="ms-date-del" onclick="delMsDateGroup('${day.date.replace(/'/g,"\\'")}')" title="删除该日期全部记录">×</span>
@@ -1337,6 +1338,35 @@ function renderMilestone(){
 
   html+=`</div>`;
   el.innerHTML=html;
+}
+// 编辑日期：输入"x月x日"或"MM-DD"，更新该日期下所有记录
+function changeMsDate(input,oldDate){
+  const val=input.value.trim();
+  let newDate='';
+  // 尝试解析"x月x日"格式
+  const m1=val.match(/(\d{1,2})月(\d{1,2})日?/);
+  if(m1){
+    newDate=`${parseInt(m1[1])}-${pad(parseInt(m1[2]))}`;
+  }else{
+    // 尝试解析"MM-DD"格式
+    const m2=val.match(/^(\d{1,2})-(\d{1,2})$/);
+    if(m2){
+      newDate=`${parseInt(m2[1])}-${pad(parseInt(m2[2]))}`;
+    }
+  }
+  if(!newDate){
+    alert('日期格式不正确，请输入如"8月1日"或"8-01"');
+    renderMilestone();
+    return;
+  }
+  // 更新所有该日期的记录
+  let changed=false;
+  window.DATA.milestones.forEach(d=>{
+    if(d.date===oldDate){d.date=newDate;changed=true}
+  });
+  if(changed){
+    save();renderMilestone();
+  }
 }
 function delMsDateGroup(date){
   const full=getTodayFullFor(date)+' '+getWeekday(date);
