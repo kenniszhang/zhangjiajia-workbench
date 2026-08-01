@@ -1434,15 +1434,25 @@ function addMsRow(dayId){
     if(detailEl) detailEl.click();
   },50);
 }
-function addMsRowByDate(date){
-  // 默认今天，如果没传就用今天
-  const d=date||getTodayMD();
-  let day=window.DATA.milestones.find(day=>day.date===d);
-  if(!day){
-    day={id:Date.now(),date:d,items:[]};
-    window.DATA.milestones.push(day);
+function addMsRowByDate(){
+  // 找日期最早的那一天（表格最底部），没有则创建今天
+  let earliest=null;
+  window.DATA.milestones.forEach(d=>{
+    if(!d.items) d.items=[];
+    if(d.items.length>0||d.date){
+      if(!earliest) earliest=d;
+      else{
+        const [am,ad]=String(d.date).split('-').map(Number);
+        const [bm,bd]=String(earliest.date).split('-').map(Number);
+        if(bm!==am?am<bm:ad<bd) earliest=d;
+      }
+    }
+  });
+  if(!earliest){
+    earliest={id:Date.now(),date:getTodayMD(),items:[]};
+    window.DATA.milestones.push(earliest);
   }
-  addMsRow(day.id);
+  addMsRow(earliest.id);
 }
 function delMsRow(dayId,itemId){
   const day=window.DATA.milestones.find(d=>d.id===dayId);
